@@ -1,0 +1,1 @@
+Here the code part of the embedded system in charge of the sendinf of the electrophysiological signals to the base system
