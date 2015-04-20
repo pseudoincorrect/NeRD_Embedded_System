@@ -68,15 +68,16 @@ static void GpioInit(void)
   __GPIOB_CLK_ENABLE();
 
 	
-	 /* Configure PA.15 pin as input floating */
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Pin = GPIO_PIN_15;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+//	 /* Configure PA.15 pin as input floating */
+//  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+//  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//  GPIO_InitStruct.Pin = GPIO_PIN_15;
+//  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /* Enable and set EXTI line 0 Interrupt to the lowest priority */
-  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 3, 0);
-  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+//  /* Enable and set EXTI line 0 Interrupt to the lowest priority */
+//  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 3, 0);
+//  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+//	
 	
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -89,6 +90,12 @@ static void GpioInit(void)
 	GPIO_InitStruct.Alternate = GPIO_AF1_TIM3;
   GPIO_InitStruct.Pin = GPIO_PIN_5;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+//****************************************************** debug pin
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pin = GPIO_PIN_15;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_RESET);
 }

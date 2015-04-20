@@ -2,6 +2,7 @@
 #include "NRF.h"
 #include "SampleSend.h"
 #include "board_interface.h"
+#include "CommonDefine.h"
 
 int main(void)
 {

@@ -15,10 +15,7 @@
 #include "stm32f0xx_hal_tim.h"
 #include "NRF.h"
 #include "RHD.h"
-
-#define CHANNEL_SIZE 	0x08 
-
-#define SAMPLE_BUFFER_SIZE 	(BYTES_PER_FRAME * NUMBER_OF_PACKETS) // defined in NRF.h
+#include "DataBuffer.h"
 
 /**************************************************************/
 // Main initialization functions

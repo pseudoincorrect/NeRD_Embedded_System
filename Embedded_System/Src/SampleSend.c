@@ -20,7 +20,7 @@ void SampleSend_Init(void)
 { 
 	NRF_Init();
 	RHD_Init();
-	TIM2Init(268, 8); // (268,8) =  20 kHz sample
+	TIM2Init (268,9); //(260,9); // (268,8) =  20 kHz sample
 }
 
 /**************************************************************/
@@ -59,17 +59,8 @@ void TIM2_IRQHandler(void)
 		{ 
 			__HAL_TIM_CLEAR_IT(&TimHandle, TIM_IT_UPDATE); // Remove TIMx update interrupt flag 
 			__HAL_TIM_CLEAR_FLAG(&TimHandle, TIM_IT_UPDATE);
-		}
-		if ( (SAMPLE_BUFFER_SIZE - SampleBufferIndex) < CHANNEL_SIZE ) // if there is not enough room in SampleBuffer
-		{
-			SampleBufferTabRhdIndex = (!SampleBufferTabRhdIndex) ? 1 : 0; 
-			SampleBufferIndex  = 0;		
-		}
-		 RHD_SampleTest(&(SampleBuffer[SampleBufferTabRhdIndex][SampleBufferIndex]), 1);
-		//RHD_Sample( &(SampleBuffer[SampleBufferTabRhdIndex][SampleBufferIndex])); 
-		SampleBufferIndex  += CHANNEL_SIZE;
-		
-		if (SampleBufferTabRhdIndex != SampleBufferTabNrfIndex)	{SendEnable = 1;}
+		}	
+		RHD_Sample(DataBuffer_WriteRHD());
 	}
 }	
 

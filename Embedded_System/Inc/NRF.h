@@ -18,15 +18,7 @@
 #include "stm32f0xx_hal_spi.h"
 #include "stm32f0xx_hal_rcc.h"
 #include "stm32f0xx_hal_cortex.h"
-
-#define BYTES_PER_FRAME	   32 // ammount of byte in one packet transmission
-#define NUMBER_OF_PACKETS	 30 // number of packet (size of the buffer)
-
-/* GPIO command */
-#define LOW		0
-#define HIGH	1
-
-#define DEBUG 1
+#include "CommonDefine.h"
 
 /**************************************************************/
 // Main initialization functions

@@ -1,6 +1,7 @@
 #include "RHD.h"
 
 uint8_t decal = 0;
+static uint8_t compress_Flag =0;
 
 static uint16_t channel[CHANNEL_SIZE] = {(MASK_CONVERT | CHANNEL0), 
 																				 (MASK_CONVERT | CHANNEL1), 
@@ -11,10 +12,9 @@ static uint16_t channel[CHANNEL_SIZE] = {(MASK_CONVERT | CHANNEL0),
 																				 (MASK_CONVERT | CHANNEL6), 
 																				 (MASK_CONVERT | CHANNEL7)};
 
-//static uint16_t channelTest[CHANNEL_SIZE] = {(0xE800),(0xE900),(0xEA00),(0xEB00),(0xEC00),(0xEC00),(0xEC00),(0xEC00)};  // read "INTANNN"
+static uint16_t bufferCompress[CHANNEL_SIZE];
 																				 
-static uint8_t  channelIndex = 0;
-static uint8_t * bufferSample;
+//static uint16_t channelTest[CHANNEL_SIZE] = {(0xE800),(0xE900),(0xEA00),(0xEB00),(0xEC00),(0xEC00),(0xEC00),(0xEC00)};  // read "INTANNN"																				
 																				 
 // **************************************************************
 // 	 				RHD_Init 
@@ -68,7 +68,7 @@ static void Spi2Init(void)
 	
 	// Set the SPI parameters 
   SpiHandle.Instance               = SPI2;
-  SpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  SpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   SpiHandle.Init.Direction         = SPI_DIRECTION_2LINES;
   SpiHandle.Init.CLKPhase          = SPI_PHASE_1EDGE;
   SpiHandle.Init.CLKPolarity       = SPI_POLARITY_LOW;
@@ -92,6 +92,9 @@ static void Spi2Init(void)
 	__HAL_SPI_ENABLE(&SpiHandle);
 }
 
+static uint8_t  channelIndex = 0;
+static uint16_t * bufferSample;
+static uint16_t * pBufferCompress;
 /**************************************************************/
 //					SPI2_IRQHandler
 /**************************************************************/
@@ -99,8 +102,10 @@ void SPI2_IRQHandler()
 {
 	// If RX buffer is NOT empty then write it to the buffer
 	if (SPI2->SR & SPI_FLAG_RXNE)
-		*bufferSample++ = (((SPI2->DR) >> decal) & 0x00FF ); // send SPI data to the buffer
-	
+	{
+			//*bufferSample++ = (((SPI2->DR) >> decal) & 0x00FF ); // send SPI data to the buffer
+			*bufferSample++ = SPI2->DR;
+	}
 	// If SPI is not busy then we have finished sending data
 	if (!(SPI2->SR & SPI_FLAG_BSY))
 	{
@@ -210,22 +215,21 @@ static void RegisterInit(void)
 /**************************************************************/
 //	 				RHD_Sample 
 /**************************************************************/
-void RHD_Sample(uint8_t * buffer)
+void RHD_Sample(uint16_t * buffer)
 {
-	//int i;
-	bufferSample = buffer;
+	bufferSample 	 = buffer;
+	pBufferCompress =  bufferCompress;
+	
 	// enable interrupt : the sampling is done in the interrupt handler
 	__HAL_SPI_ENABLE_IT(&SpiHandle, SPI_IT_RXNE | SPI_IT_TXE);
-	//for (i=0; i<8; i++)
-	//  *bufferSample++ = Spi2ReturnSend(channel[i]);
 }
 
 static uint8_t chan = 0, time = 0, freq = 0, freq2 = 0;		
-static uint8_t *bufferSampleTest;
+static uint16_t *bufferSampleTest;
 /**************************************************************/
 //	 				RHD_SampleTest
 /**************************************************************/
-void RHD_SampleTest(uint8_t * buffer, uint8_t test)
+void RHD_SampleTest(uint16_t * buffer, uint8_t test)
 {
 	bufferSampleTest = buffer;	
 	

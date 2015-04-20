@@ -502,6 +502,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\Src\board_interface.c</FilePath>
             </File>
+            <File>
+              <FileName>FBAR.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Src\FBAR.c</FilePath>
+            </File>
+            <File>
+              <FileName>DataBuffer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Src\DataBuffer.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

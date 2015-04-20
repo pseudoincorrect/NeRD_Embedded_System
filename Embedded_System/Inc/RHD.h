@@ -12,14 +12,9 @@
 #include <stdint.h>
 #include "stm32f0xx.h"
 #include "rhd2000.h"
+#include "CommonDefine.h"
+#include "FBAR.h"
 
-/* GPIO command */
-#define LOW		0
-#define HIGH	1
-
-#define DEBUG 1
-
-#define CHANNEL_SIZE 	0x08 // must be a multiple of BYTES_PER_FRAME (NRF.h)
 
 // channel number with a left shift (channel << 8) to speed-up SPI protocol
 // ex : channel = 3  thus CHANNEL = channel << 8 
@@ -56,6 +51,8 @@ static void Spi2Send(uint16_t data);
 void SPI2_IRQHandler(void);
 // send a buffer to SPI2 and return the data
 uint16_t	Spi2ReturnSend(uint16_t data);
+//compress the datas
+void ApplyCompressing(uint8_t * ToCompress);
 
 /**************************************************************/
 // RHD functions
@@ -63,11 +60,12 @@ uint16_t	Spi2ReturnSend(uint16_t data);
 // function used to test the spi of the NRF
 static void RegisterInit(void);
 //sample the channels 
-void RHD_Sample(uint8_t * buffer);
+void RHD_Sample(uint16_t * buffer);
 // offer 3 tests for the connexion : 
 // 1) one same value per channel
 // 2) same counter on each chanel
 // 3) increasing differtent triangles per channel 
-void RHD_SampleTest(uint8_t * buffer, uint8_t test); 
+void RHD_SampleTest(uint16_t * buffer, uint8_t test); 
+
 
 #endif
