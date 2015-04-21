@@ -23,4 +23,8 @@
 #define CUT_VAL_SIZE 	(POW_2_NBIT - 1) // number of cut value
 #define ETA					 	 0.1						// adaptation parameter
 
+#define DEBUG_HIGH 	(GPIOA->BSRR |= GPIO_PIN_15)
+#define DEBUG_LOW		(GPIOA->BSRR |= ((uint32_t) GPIO_PIN_15 << 16))
+
+
 #endif

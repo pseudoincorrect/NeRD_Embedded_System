@@ -14,11 +14,15 @@ uint16_t delta; // initial resolution compression = range / number of cut value
 cut val i :							0					1					2 	
 							|---------|---------|---------|---------|
 winner :					00				01				10				11
-Delta					|---------|
+Delta	 :			|---------|
 
 etaAdd  [0] = ETA/1			[1] =	ETA/2			[2] =	ETA/3		
 etaSous [0] = ETA/3			[1] =	ETA/2			[2] =	ETA/1	
 */
+volatile uint16_t nbit;
+volatile uint16_t pow2;
+volatile uint16_t cutval;
+
 
 /**************************************************************/
 //					FBAR_Init
@@ -39,6 +43,10 @@ void FBAR_Init(void)
 		etaSous[i] = ETA / (i+1);
 		etaAdd[i]  = ETA / (CUT_VAL_SIZE-i);
 	}
+	
+	nbit = NBIT;
+	pow2 = POW_2_NBIT;
+	cutval = CUT_VAL_SIZE;
 }
 
 /**************************************************************/
@@ -48,13 +56,14 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 {
 	uint16_t i,j,winner,ValueCurrentChannel;
 	
-	GPIOA->BSRR |= GPIO_PIN_15;
-	
+	DEBUG_HIGH;
+	#pragma unroll_completely
 	for(i=0; i < CHANNEL_SIZE; i++)
 	{		
 		ValueCurrentChannel = *bufferFrom++;
 		winner = 0;
-	
+		
+		#pragma unroll_completely 
 		for (j=0; j < CUT_VAL_SIZE; j++)
 		{
 			if (ValueCurrentChannel >= cutValue[i][j])
@@ -67,8 +76,9 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 		}
 		*bufferTo++ = winner; 
 	}
-  GPIOA->BSRR |= ((uint32_t) GPIO_PIN_15 << 16);
+  DEBUG_LOW;
 }
+
 
 //routine to check and compress datas
 //void	RHD_Compress(void);	

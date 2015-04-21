@@ -185,7 +185,10 @@ static void Spi1DmaSend(uint8_t * addr)
 	//Enable SPI dma
 	SPI1->CR2 |= (uint32_t) SPI_CR2_TXDMAEN;	 
 	
-	while (dmaFlag == 1){;}
+	while (dmaFlag == 1)
+	{
+		DataBuffer_Compress();
+	}
 }
 
 // *************************************************************
@@ -248,11 +251,13 @@ void NRF_SendBuffer(uint8_t * bufferPointer)
 				{
 					CeDigitalWrite(HIGH);	// ce ==> HIGH, max 10 ms
 				}
+				
+ 			}	
 				DataBuffer_Compress();
- 			}			
 		}
 		Spi1Send8Bit( clearIrqFlag, sizeof(clearIrqFlag) );
 		fifo_fill--;
+		DataBuffer_Compress();
 	} 	
 	CeDigitalWrite(LOW);
   Spi1Send8Bit( receiveMode, sizeof(receiveMode) );
