@@ -208,18 +208,19 @@ void DMA1_Channel2_3_IRQHandler(void)
 	DMA1->IFCR |= (uint32_t) DMA_IFCR_CTCIF3;	
 }		
 
-
+static uint8_t transmitMode[2] = {W_REGISTER | CONFIG, 0x52};
+static uint8_t clearIrqFlag[2] = {W_REGISTER | STATUS, 0x70};
+static uint8_t receiveMode[2]  = {W_REGISTER | CONFIG, 0x33};
+static uint8_t flushTxFifo		 	= FLUSH_TX;
+static uint8_t packetSent 			= 0;	// number of packet sent
+static uint8_t fifo_fill  			= 0; // number of filled Fifo
 /**************************************************************/
 // 					NRF_SendBuffer
 /**************************************************************/
 void NRF_SendBuffer(uint8_t * bufferPointer)
 {	
-	uint8_t transmitMode[2] = {W_REGISTER | CONFIG, 0x52};
-	uint8_t clearIrqFlag[2] = {W_REGISTER | STATUS, 0x70};
-	uint8_t receiveMode[2]  = {W_REGISTER | CONFIG, 0x33};
-	uint8_t flushTxFifo		 	= FLUSH_TX;
-	uint8_t packetSent 			= 0;	// number of packet sent
-	uint8_t fifo_fill  			= 0; // number of filled Fifo
+	 packetSent = 0;
+	 fifo_fill  = 0;
 	
 	CeDigitalWrite(LOW);
 	
@@ -247,14 +248,15 @@ void NRF_SendBuffer(uint8_t * bufferPointer)
 				{
 					CeDigitalWrite(HIGH);	// ce ==> HIGH, max 10 ms
 				}
- 			}				
+				DataBuffer_Compress();
+ 			}			
 		}
 		Spi1Send8Bit( clearIrqFlag, sizeof(clearIrqFlag) );
 		fifo_fill--;
 	} 	
 	CeDigitalWrite(LOW);
   Spi1Send8Bit( receiveMode, sizeof(receiveMode) );
-	Spi1Send8Bit( &flushTxFifo, 1 );	
+	Spi1Send8Bit( &flushTxFifo, 1 );
 }
 
 

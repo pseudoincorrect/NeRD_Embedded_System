@@ -44,13 +44,15 @@ void FBAR_Init(void)
 /**************************************************************/
 //					FBAR_Compress
 /**************************************************************/
-void FBAR_Compress(uint16_t * bufferCompress, uint8_t * bufferSample, uint8_t number_channel)
+void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 {
 	uint16_t i,j,winner,ValueCurrentChannel;
 	
-	for(i=0; i < number_channel; i++)
+	GPIOA->BSRR |= GPIO_PIN_15;
+	
+	for(i=0; i < CHANNEL_SIZE; i++)
 	{		
-		ValueCurrentChannel = *bufferCompress++;
+		ValueCurrentChannel = *bufferFrom++;
 		winner = 0;
 	
 		for (j=0; j < CUT_VAL_SIZE; j++)
@@ -63,14 +65,13 @@ void FBAR_Compress(uint16_t * bufferCompress, uint8_t * bufferSample, uint8_t nu
 			else	
 				cutValue[i][j] -= etaSous[j];	
 		}
-		*bufferSample++ = winner; 
+		*bufferTo++ = winner; 
 	}
+  GPIOA->BSRR |= ((uint32_t) GPIO_PIN_15 << 16);
 }
-
 
 //routine to check and compress datas
 //void	RHD_Compress(void);	
-
 ///**************************************************************/
 ////					RHD_Compress
 ///**************************************************************/
@@ -89,4 +90,3 @@ void FBAR_Compress(uint16_t * bufferCompress, uint8_t * bufferSample, uint8_t nu
 //		GPIOA->BSRR |= ((uint32_t) GPIO_PIN_15 << 16);
 //	}
 //}
-

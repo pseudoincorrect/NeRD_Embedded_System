@@ -1,7 +1,6 @@
 #include "RHD.h"
 
 uint8_t decal = 0;
-static uint8_t compress_Flag =0;
 
 static uint16_t channel[CHANNEL_SIZE] = {(MASK_CONVERT | CHANNEL0), 
 																				 (MASK_CONVERT | CHANNEL1), 
@@ -11,8 +10,6 @@ static uint16_t channel[CHANNEL_SIZE] = {(MASK_CONVERT | CHANNEL0),
 																				 (MASK_CONVERT | CHANNEL5), 
 																				 (MASK_CONVERT | CHANNEL6), 
 																				 (MASK_CONVERT | CHANNEL7)};
-
-static uint16_t bufferCompress[CHANNEL_SIZE];
 																				 
 //static uint16_t channelTest[CHANNEL_SIZE] = {(0xE800),(0xE900),(0xEA00),(0xEB00),(0xEC00),(0xEC00),(0xEC00),(0xEC00)};  // read "INTANNN"																				
 																				 
@@ -94,7 +91,6 @@ static void Spi2Init(void)
 
 static uint8_t  channelIndex = 0;
 static uint16_t * bufferSample;
-static uint16_t * pBufferCompress;
 /**************************************************************/
 //					SPI2_IRQHandler
 /**************************************************************/
@@ -217,8 +213,7 @@ static void RegisterInit(void)
 /**************************************************************/
 void RHD_Sample(uint16_t * buffer)
 {
-	bufferSample 	 = buffer;
-	pBufferCompress =  bufferCompress;
+	bufferSample = buffer;
 	
 	// enable interrupt : the sampling is done in the interrupt handler
 	__HAL_SPI_ENABLE_IT(&SpiHandle, SPI_IT_RXNE | SPI_IT_TXE);

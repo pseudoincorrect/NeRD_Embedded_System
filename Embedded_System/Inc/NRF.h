@@ -18,6 +18,7 @@
 #include "stm32f0xx_hal_spi.h"
 #include "stm32f0xx_hal_rcc.h"
 #include "stm32f0xx_hal_cortex.h"
+#include "DataBuffer.h"
 #include "CommonDefine.h"
 
 /**************************************************************/

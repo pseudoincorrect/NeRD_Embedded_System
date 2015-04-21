@@ -12,9 +12,10 @@
 #include <stdint.h>
 #include <math.h>
 #include <CommonDefine.h>
+#include "stm32f0xx.h"
 
 void FBAR_Init(void);
 
-void FBAR_Compress(uint16_t * bufferCompress, uint8_t * bufferSample, uint8_t number_channel);
+void FBAR_Compress(uint16_t * bufferCompress, uint8_t * bufferSample);
 
 #endif

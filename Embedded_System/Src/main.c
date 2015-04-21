@@ -23,6 +23,7 @@ int main(void)
 	while (1)
   {
 		SampleSend_Acquisition();
+		DataBuffer_Compress();
   } 
 }
 

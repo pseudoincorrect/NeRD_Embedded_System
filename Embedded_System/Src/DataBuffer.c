@@ -7,43 +7,40 @@ DataBuffer ElectrophyData;
 /**************************************************************/
 void DataBuffer_Init(void)
 {
-	ElectrophyData.writeRHD_index 	= 0;
-	ElectrophyData.writeRHD_element = 0;
-	ElectrophyData.readRHD_index 		= 0;
-	ElectrophyData.writeNRF_index 	= 0;
-	ElectrophyData.readNRF_index 		= 0;
+	ElectrophyData.Write16_index 		= 0;
+	ElectrophyData.Read16_index 		= 0;
+	
+	ElectrophyData.Write8_index 	= 0;
+	ElectrophyData.Write8_element	= 0;
+	ElectrophyData.Read8_index 		= 0;
 }
 
 /**************************************************************/
-//					DataBuffer_WriteRHD
+//					DataBufferWrite16
 /**************************************************************/
-uint16_t * DataBuffer_WriteRHD(void)
+uint16_t * DataBuffer_Write16(void)
 {	
-	ElectrophyData.writeRHD_element += CHANNEL_SIZE;
+	ElectrophyData.Write16_index++;
 	
-	if(ElectrophyData.writeRHD_element >= SAMPLE_BUFFER_SIZE)
-	{
-		ElectrophyData.writeRHD_element  = 0;
-		ElectrophyData.writeRHD_index++;
-		if(ElectrophyData.writeRHD_index >= SIZE_BUFFER_RHD)
-			ElectrophyData.writeRHD_index = 0;
-	}
-	return &(ElectrophyData.Data16[ElectrophyData.writeRHD_index][ElectrophyData.writeRHD_element]); 
+	if(ElectrophyData.Write16_index >= SIZE_BUFFER_RHD)
+		ElectrophyData.Write16_index = 0;
+
+	return (ElectrophyData.Data16[ElectrophyData.Write16_index]); 
 }
 
-uint16_t previousReadRHD_index;
+uint16_t previousRead16_index;
 /**************************************************************/
-//					DataBuffer_ReadRHD
+//					DataBuffer_Read16
 /**************************************************************/
-uint16_t * DataBuffer_ReadRHD(void)
+static uint16_t * DataBufferRead16(void)
 {
-	previousReadRHD_index = ElectrophyData.readRHD_index;
-	ElectrophyData.readRHD_index++;
+	previousRead16_index = ElectrophyData.Read16_index;
+	ElectrophyData.Read16_index++;
 	
-	if(ElectrophyData.writeRHD_element >= SIZE_BUFFER_RHD)
-		ElectrophyData.writeRHD_element = 0;
+	if(ElectrophyData.Read16_index >= SIZE_BUFFER_RHD)
+		ElectrophyData.Read16_index = 0;
 	
-	return (ElectrophyData.Data16[previousReadRHD_index]); 
+	return (ElectrophyData.Data16[previousRead16_index]); 
 }
 
 /**************************************************************/
@@ -51,38 +48,43 @@ uint16_t * DataBuffer_ReadRHD(void)
 /**************************************************************/	
 uint8_t DataBuffer_Data16_CheckFill(void)
 {
-	if (ElectrophyData.writeRHD_index != ElectrophyData.readRHD_index)
+	if (ElectrophyData.Write16_index != ElectrophyData.Read16_index)
 		return 1;
 	else
 		return 0;
 }
 
 /**************************************************************/
-//					DataBuffer_WriteNRF
+//					 DataBufferWrite8
 /**************************************************************/
-uint8_t * DataBuffer_WriteNRF(void)
+static uint8_t *  DataBufferWrite8(void)
 {	
-	ElectrophyData.writeNRF_index++;
+	ElectrophyData.Write8_element += CHANNEL_SIZE;
 	
-	if(ElectrophyData.writeNRF_index >= SIZE_BUFFER_NRF)
-		ElectrophyData.writeNRF_index = 0;
-		
-	return (ElectrophyData.Data8[ElectrophyData.writeNRF_index]); 
+	if(ElectrophyData.Write8_element > (SAMPLE_BUFFER_SIZE - CHANNEL_SIZE))
+	{
+		ElectrophyData.Write8_element = 0;
+		ElectrophyData.Write8_index++;
+	
+		if(ElectrophyData.Write8_index >= SIZE_BUFFER_NRF)
+			ElectrophyData.Write8_index = 0;
+	}
+	return (&ElectrophyData.Data8[ElectrophyData.Write8_index][ElectrophyData.Write8_element]); 
 }
 
-uint16_t previousReadNRF_index;
+uint16_t previousRead8_index;
 /**************************************************************/
-//					DataBuffer_ReadNRF
+//					DataBufferRead8
 /**************************************************************/
-uint8_t * DataBuffer_ReadNRF(void)
+uint8_t * DataBufferRead8(void)
 {	
-	previousReadNRF_index = ElectrophyData.readNRF_index;
-	ElectrophyData.readNRF_index++;
+	previousRead8_index = ElectrophyData.Read8_index;
+	ElectrophyData.Read8_index++;
 	
-	if(ElectrophyData.readNRF_index >= SIZE_BUFFER_NRF)
-		ElectrophyData.readNRF_index  = 0;
+	if(ElectrophyData.Read8_index >= SIZE_BUFFER_NRF)
+		ElectrophyData.Read8_index  = 0;
 		
-	return (ElectrophyData.Data8[previousReadNRF_index]); 
+	return (ElectrophyData.Data8[previousRead8_index]); 
 }
 
 /**************************************************************/
@@ -90,13 +92,20 @@ uint8_t * DataBuffer_ReadNRF(void)
 /**************************************************************/
 uint8_t DataBuffer_Data8_CheckFill(void)
 {
-	if (ElectrophyData.readNRF_index != ElectrophyData.writeNRF_index)
+	if (ElectrophyData.Read8_index != ElectrophyData.Write8_index)
 		return 1;
 	else
 		return 0;
 }
 
-
+/**************************************************************/
+//					DataBuffer_Compress
+/**************************************************************/
+void DataBuffer_Compress(void)
+{
+	if(DataBuffer_Data16_CheckFill())
+		FBAR_Compress(DataBufferRead16(),  DataBufferWrite8() );
+}
 
 
 

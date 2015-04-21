@@ -1,13 +1,5 @@
 #include "SampleSend.h"
 
-uint8_t  SampleBuffer[2][SAMPLE_BUFFER_SIZE] = {0}; // Main sample buffer 
-static uint8_t  SampleBufferTabRhdIndex = 0; // index of the current array used by the RHD (write)
-static uint8_t  SampleBufferTabNrfIndex = 0; // index of the current array used by the NRF (read)
-
-static uint16_t SampleBufferIndex 			= 0; // index where the RHD is writing in the main sample buffer
-static uint8_t  SendEnable 						  = 0; // Flag to enable the sending of data (wirelessly)
-uint8_t 			  SampleEnable 						= 0; // Flag to enable the sampling by the RHD
-
 volatile uint32_t Tim1DIER;
 volatile uint32_t Tim1SR;
 	
@@ -60,7 +52,7 @@ void TIM2_IRQHandler(void)
 			__HAL_TIM_CLEAR_IT(&TimHandle, TIM_IT_UPDATE); // Remove TIMx update interrupt flag 
 			__HAL_TIM_CLEAR_FLAG(&TimHandle, TIM_IT_UPDATE);
 		}	
-		RHD_Sample(DataBuffer_WriteRHD());
+		RHD_Sample(DataBuffer_Write16());
 	}
 }	
 
@@ -69,11 +61,8 @@ void TIM2_IRQHandler(void)
 /**************************************************************/
 void SampleSend_Enable(uint8_t state)
 {		
-		SampleEnable = state;	
-		if(SampleEnable)
+		if(state)
 		{
-			SendEnable = 0;
-			SampleBufferTabRhdIndex = 0; SampleBufferTabNrfIndex = 0;	SampleBufferIndex = 1;
 			__HAL_TIM_ENABLE_IT(&TimHandle, TIM_IT_UPDATE); // TIM2 interrupt : update
 			__HAL_TIM_ENABLE(&TimHandle);
 		}
@@ -89,16 +78,9 @@ void SampleSend_Enable(uint8_t state)
 /**************************************************************/
 void SampleSend_Acquisition(void)
 {
-	if (SendEnable)
+	if (DataBuffer_Data8_CheckFill())
 	{	
-		uint8_t IndexTmp;
-		
-		SendEnable = 0;
-		
-		IndexTmp = SampleBufferTabNrfIndex;
-		SampleBufferTabNrfIndex = SampleBufferTabRhdIndex;
-		
-		NRF_SendBuffer(&SampleBuffer[IndexTmp][0]);
+		NRF_SendBuffer(DataBufferRead8());
 	}
 }
 
