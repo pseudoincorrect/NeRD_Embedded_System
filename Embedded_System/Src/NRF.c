@@ -187,7 +187,7 @@ static void Spi1DmaSend(uint8_t * addr)
 	
 	while (dmaFlag == 1)
 	{
-		DataBuffer_Compress();
+		DataBuffer_Process();
 	}
 }
 
@@ -253,11 +253,11 @@ void NRF_SendBuffer(uint8_t * bufferPointer)
 				}
 				
  			}	
-				DataBuffer_Compress();
+				DataBuffer_Process();
 		}
 		Spi1Send8Bit( clearIrqFlag, sizeof(clearIrqFlag) );
 		fifo_fill--;
-		DataBuffer_Compress();
+		DataBuffer_Process();
 	} 	
 	CeDigitalWrite(LOW);
   Spi1Send8Bit( receiveMode, sizeof(receiveMode) );

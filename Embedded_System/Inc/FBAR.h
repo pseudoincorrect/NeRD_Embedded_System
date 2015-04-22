@@ -16,6 +16,8 @@
 
 void FBAR_Init(void);
 
+void FBAR_Reset(uint16_t * bufferFrom, uint8_t * bufferTo);
+
 void FBAR_Compress(uint16_t * bufferCompress, uint8_t * bufferSample);
 
 #endif
