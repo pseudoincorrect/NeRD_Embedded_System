@@ -12,7 +12,7 @@
 #define CHANNEL_SIZE 	0x08 // must be a multiple of BYTES_PER_FRAME (NRF.h)
 
 #define BYTES_PER_FRAME	   32 // ammount of byte in one packet transmission
-#define NUMBER_OF_PACKETS	 20 // number of packet send at once (size of the buffer)
+#define NUMBER_OF_PACKETS	 40 // number of packet send at once (size of the buffer)
 #define SAMPLE_BUFFER_SIZE 	(BYTES_PER_FRAME * NUMBER_OF_PACKETS) // defined in NRF.h
 
 #define SIZE_BUFFER_RHD			50	

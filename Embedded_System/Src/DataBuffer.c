@@ -119,10 +119,12 @@ void DataBuffer_Process(void)
 {
 	if(DataBuffer_Data16_CheckFill())
 	{
+#ifdef COMPRESS
 		if(!ElectrophyData.Write8_element)
 			DataBuffer_ApplyReset();	
 		else
-			FBAR_Compress(DataBufferRead16(),  DataBufferWrite8() );
+			FBAR_Compress(DataBufferRead16(),  DataBufferWrite8() );		
+#endif
 	}
 }
 

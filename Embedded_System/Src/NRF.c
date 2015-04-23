@@ -105,7 +105,7 @@ static void SpiDmaInit(void)
 	DMA1_Channel3->CPAR  = (uint32_t) &(SPI1->DR);  // dest
 	
 	/* DMA interrupt init */
-  HAL_NVIC_SetPriority(DMA1_Channel2_3_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(DMA1_Channel2_3_IRQn, 2, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);	
 	
 	__HAL_SPI_ENABLE(&SpiHandle);

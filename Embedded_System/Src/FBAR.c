@@ -54,7 +54,21 @@ void FBAR_Init(void)
 /**************************************************************/
 void FBAR_Reset(uint16_t * bufferFrom, uint8_t * bufferTo)
 {
-	;
+	DEBUG_HIGH;	
+	
+	static uint16_t i, valueFrom;
+	
+	*bufferTo++ = 0XFF;
+	*bufferTo++ = 0XFF;
+	
+	#pragma unroll_completely
+	for(i=0; i < CHANNEL_SIZE; i++)
+	{		
+		valueFrom = *bufferFrom++;
+		*bufferTo++ = (valueFrom >> 8);
+		*bufferTo++ = (valueFrom & 0xFF);		
+	}
+	DEBUG_LOW;
 }
 
 /**************************************************************/

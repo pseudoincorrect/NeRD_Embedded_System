@@ -81,7 +81,7 @@ static void Spi2Init(void)
 	HAL_SPI_Init(&SpiHandle);
 
   // enable SPI2 global interrupt
-  HAL_NVIC_SetPriority(SPI2_IRQn, 2, 0);
+  HAL_NVIC_SetPriority(SPI2_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(SPI2_IRQn);	
 
 	//__HAL_SPI_ENABLE_IT(&SpiHandle, SPI_IT_RXNE | SPI_IT_TXE);
