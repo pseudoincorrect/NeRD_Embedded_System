@@ -14,7 +14,7 @@ void SampleSend_Init(void)
 	RHD_Init();
 	DataBuffer_Init();
 	FBAR_Init();
-	TIM2Init (268,8); //(260,9); // (268,8) =  20 kHz sample
+	TIM2Init (265,9); //(260,9); // (268,8) =  20 kHz sample
 }
 
 /**************************************************************/
@@ -54,7 +54,11 @@ void TIM2_IRQHandler(void)
 			__HAL_TIM_CLEAR_IT(&TimHandle, TIM_IT_UPDATE); // Remove TIMx update interrupt flag 
 			__HAL_TIM_CLEAR_FLAG(&TimHandle, TIM_IT_UPDATE);
 		}	
+#ifdef TESTBUFFER
+		RHD_SampleTest(DataBuffer_Write16(), 1);
+#else
 		RHD_Sample(DataBuffer_Write16());
+#endif
 	}
 }	
 

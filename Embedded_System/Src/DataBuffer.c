@@ -2,11 +2,17 @@
 
 DataBuffer ElectrophyData;
 
+volatile uint8_t * NRFptr;
+volatile uint16_t * RHDptr;
+
 /**************************************************************/
 //					DataBuffer_Init
 /**************************************************************/
 void DataBuffer_Init(void)
 {
+	NRFptr = ElectrophyData.Data8[0];
+	RHDptr = ElectrophyData.Data16[0];
+	
 	ElectrophyData.Write16_index  = 0;
 	ElectrophyData.Read16_index 	= 0;
 	
@@ -88,8 +94,9 @@ uint16_t previousWrite8_index;
 static uint8_t *  DataBufferWrite8(void)
 {	
 	previousWrite8_element = ElectrophyData.Write8_element;
+	previousWrite8_index 	 = ElectrophyData.Write8_index;
+	
 	ElectrophyData.Write8_element += CHANNEL_SIZE;
-	previousWrite8_index = ElectrophyData.Write8_index;
 	
 	if(ElectrophyData.Write8_element > (SAMPLE_BUFFER_SIZE - CHANNEL_SIZE))
 	{
@@ -120,11 +127,18 @@ void DataBuffer_Process(void)
 	if(DataBuffer_Data16_CheckFill())
 	{
 #ifdef COMPRESS
-		if(!ElectrophyData.Write8_element)
-			DataBuffer_ApplyReset();	
+		DEBUG_HIGH;
+		if(ElectrophyData.Write8_element)
+			FBAR_Compress(DataBufferRead16(),  DataBufferWrite8() );			
 		else
-			FBAR_Compress(DataBufferRead16(),  DataBufferWrite8() );		
+			DataBuffer_ApplyReset();	
+		DEBUG_LOW;
+#else
+		DEBUG_HIGH;
+		FBAR_Dissemble(DataBufferRead16(),  DataBufferWrite8() );			
+		DEBUG_LOW;
 #endif
+		
 	}
 }
 

@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include "nRF24L01.h"
 #include "stm32f0xx.h"
-#include "stm32f0xx_hal_gpio.h"
+
 #include "stm32f0xx_hal_gpio_ex.h"
 #include "stm32f0xx_hal_dma.h"
 #include "stm32f0xx_hal_spi.h"

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "CommonDefine.h"
 #include "FBAR.h"
+#include "stm32f0xx.h"
 
 // Handler of the buffer and its pointers
 typedef struct

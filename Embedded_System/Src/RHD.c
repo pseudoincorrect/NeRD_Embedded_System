@@ -2,6 +2,14 @@
 
 uint8_t decal = 0;
 
+uint16_t testValue[SIZE_VALUE] = {4300,  8600,  11000, 8400,  12000, 
+																	9000,  17000, 29000, 40000, 54000, 
+																	25000, 1000,  5000,  10000, 18000, 
+																	8600,  9000,  8500,  14000, 10000,
+																	23000, 33000, 17000, 8600,  15000};
+
+uint16_t testBuffer[SIZE_TEST];
+
 static uint16_t channel[CHANNEL_SIZE] = {(MASK_CONVERT | CHANNEL0), 
 																				 (MASK_CONVERT | CHANNEL1), 
 																				 (MASK_CONVERT | CHANNEL2), 
@@ -13,6 +21,8 @@ static uint16_t channel[CHANNEL_SIZE] = {(MASK_CONVERT | CHANNEL0),
 																				 
 //static uint16_t channelTest[CHANNEL_SIZE] = {(0xE800),(0xE900),(0xEA00),(0xEB00),(0xEC00),(0xEC00),(0xEC00),(0xEC00)};  // read "INTANNN"																				
 																				 
+static void InitTestBuffer(void);																				 
+																				 
 // **************************************************************
 // 	 				RHD_Init 
 // **************************************************************
@@ -21,6 +31,7 @@ void RHD_Init(void)
 	GPIOInit();
   Spi2Init();
 	RegisterInit();
+	InitTestBuffer();
 }
 
 // **************************************************************
@@ -219,8 +230,30 @@ void RHD_Sample(uint16_t * buffer)
 	__HAL_SPI_ENABLE_IT(&SpiHandle, SPI_IT_RXNE | SPI_IT_TXE);
 }
 
+/**************************************************************/
+//	 				InitTestBuffer
+/**************************************************************/
+static void InitTestBuffer(void)
+{
+	uint16_t i, j, iPlusOne, delta;
+	
+	for(i = 0; i < SIZE_VALUE; i++)
+	{	
+		if (i == SIZE_VALUE - 1)	iPlusOne = 0;
+		else											iPlusOne = i+1;
+	
+		delta = (testValue[iPlusOne] - testValue[i]) / INTERVAL_TEST; //either positive or negative
+		
+		for(j = 0; j < INTERVAL_TEST; j++)		
+		{
+			testBuffer[(INTERVAL_TEST * i) + j] = testValue[i] + (j * delta);
+		}
+	}
+}
+
 static uint8_t chan = 0, time = 0, freq = 0, freq2 = 0;		
 static uint16_t *bufferSampleTest;
+static uint16_t testElement = 0;
 /**************************************************************/
 //	 				RHD_SampleTest
 /**************************************************************/
@@ -233,7 +266,13 @@ void RHD_SampleTest(uint16_t * buffer, uint8_t test)
 		case 1 :
 		{
 			for (chan = 0; chan < CHANNEL_SIZE; chan++)
-				*bufferSampleTest++ = (chan + 1) * 10;
+				*bufferSampleTest++ = testBuffer[testElement];
+			
+			testElement++;
+			
+			if (testElement >= SIZE_TEST)
+				testElement = 0;
+			
 			break;
 		}
 		
