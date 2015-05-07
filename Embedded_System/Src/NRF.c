@@ -247,6 +247,7 @@ void NRF_SendBuffer(uint8_t * bufferPointer)
 			}    
 			else 
 			{
+				
 				if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1) != 1) 
 				{
 					CeDigitalWrite(HIGH);	// ce ==> HIGH, max 10 ms
