@@ -85,7 +85,7 @@ void FBAR_Reset(uint16_t * bufferFrom, uint8_t * bufferTo)
 //					FBAR_Compress
 /**************************************************************************/
 // this function will take a pointer pointing toward 
-//CHANNEL_SIZE values compress them on NBIT bits 
+// CHANNEL_SIZE values compress them on NBIT bits 
 // and send it to a buffer (the NRF buffer) for a next sending
 /**************************************************************************/
 void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
@@ -105,11 +105,11 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 			{
 				if(j == (CUT_VAL_SIZE-1))
 				{
-					//on controle que les cutvalues ne dépassent pas l2^16
+					// on controle que les cutvalues ne dépassent pas l2^16
 					if (cutValue[i][CUT_VAL_SIZE-1] <  65500 - ETA) 
 						cutValue[i][j] += etaAdd[j];
 				}
-				//anti chevauchement (et compilation warning j+1, depassement range tableau, secu à prévoir)
+				// anti chevauchement (et compilation warning j+1, depassement range tableau, secu à prévoir)
 				else if(cutValue[i][j+1] - cutValue[i][j] >= etaAdd[j]) 
 				{
 					cutValue[i][j] += etaAdd[j];	
@@ -120,14 +120,14 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 			{
 				if (!j)
 				{
-					//on controle que les cutvalues ne dépassent pas 0 en négatif
-					if (cutValue[i][0] >  ETA) 
-						cutValue[i][j] -= etaSous[j];	
+					// on controle que les cutvalues ne dépassent pas 0 en négatif
+					if (cutValue[i][0] > ETA) 
+						cutValue[i][0] -= etaSous[0];	
 				}
-				//anti chevauchement (et compilation warning j-1, depassement negatif range tableau, secu à prévoir)
+				// anti chevauchement (et compilation warning j-1, depassement negatif range tableau, secu à prévoir)
 				else if ((cutValue[i][j] - cutValue[i][j-1] >= etaSous[j]))  
 				{
-					cutValue[i][j] -= etaSous[j];	
+					cutValue[i][j] -=  etaSous[j];	
 				}
 			}
 		}	

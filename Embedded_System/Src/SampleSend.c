@@ -14,7 +14,7 @@ void SampleSend_Init(void)
 	RHD_Init();
 	DataBuffer_Init();
 	FBAR_Init();
-	TIM2Init (265,9); //(260,9); // (268,8) =  20 kHz sample
+	TIM2Init (250,10); //(260,9); // (268,8) =  20 kHz sample
 }
 
 /**************************************************************/
