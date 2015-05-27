@@ -7,7 +7,7 @@ The purpose of this system is to log the the electrical activity of a rat's neur
 
 ![alt text][global_system]
 
-[global_system]: https://github.com/pseudoincorrect/Electrophy_Base_System/pictures/global_system.png "Global data acquisition system"
+[global_system]: https://raw.githubusercontent.com/pseudoincorrect/Electrophy_Embedded_System/master/pictures/global_system.png "Global data acquisition system"
 
 
 ### THis repository contain the code and the eagle file necessary to create a the transmitting system embedded on the rodent (see above)
