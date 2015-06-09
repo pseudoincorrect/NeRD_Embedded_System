@@ -1,5 +1,7 @@
 #include "NRF.h"
 
+static DataStateTypeDef NRF_DataState = FIRST_STATE;
+static uint8_t NRF_DataStateFLAG = 0;
 // **************************************************************
 // 	 				NRF_Init 
 // **************************************************************
@@ -54,7 +56,6 @@ static void GPIOInit(void)
   GPIO_InitStructure.Speed = GPIO_SPEED_MEDIUM;
   GPIO_InitStructure.Pull  = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
-	
 }
 
 //init structures for the config 
@@ -134,7 +135,25 @@ static void CsnDigitalWrite(uint8_t state)
 
 static uint8_t indexSpi1;
 // **************************************************************
-//					Spi1Send 
+//					Spi1ReturnSend8Bit 
+// **************************************************************
+static void Spi1ReturnSend8Bit(uint8_t * dataTo, uint8_t * dataFrom, uint8_t length)
+{	
+	CsnDigitalWrite(LOW);
+	
+	for (indexSpi1=0; indexSpi1<length; indexSpi1++) 
+	{
+		*((__IO uint8_t*)(&(SPI1->DR))) = *(dataTo+indexSpi1);
+		while( !(SPI1->SR & SPI_FLAG_TXE) ); 	// wait until transmit complete
+		while( !(SPI1->SR & SPI_FLAG_RXNE) ); // wait until receive complete
+		while( SPI1->SR & SPI_FLAG_BSY ); 		// wait until SPI is not busy anymore
+	  *(dataFrom+indexSpi1) = *((__IO uint8_t*)(&(SPI1->DR)));
+  }
+	CsnDigitalWrite(HIGH);
+}
+
+// **************************************************************
+//					Spi1Send8Bit 
 // **************************************************************
 static void Spi1Send8Bit(uint8_t * data, uint8_t length)
 {	
@@ -215,6 +234,7 @@ static uint8_t transmitMode[2] = {W_REGISTER | CONFIG, 0x52};
 static uint8_t clearIrqFlag[2] = {W_REGISTER | STATUS, 0x70};
 static uint8_t receiveMode[2]  = {W_REGISTER | CONFIG, 0x33};
 static uint8_t flushTxFifo		 	= FLUSH_TX;
+static uint8_t flushRxFifo		 	= FLUSH_RX;
 static uint8_t packetSent 			= 0;	// number of packet sent
 static uint8_t fifo_fill  			= 0; // number of filled Fifo
 /**************************************************************/
@@ -222,9 +242,10 @@ static uint8_t fifo_fill  			= 0; // number of filled Fifo
 /**************************************************************/
 void NRF_SendBuffer(uint8_t * bufferPointer)
 {	
-	 packetSent = 0;
-	 fifo_fill  = 0;
+	packetSent = 0;
+	fifo_fill  = 0;
 	
+  Check_Reception(); 
 	CeDigitalWrite(LOW);
 	
 	Spi1Send8Bit( transmitMode, sizeof(transmitMode) );
@@ -246,13 +267,11 @@ void NRF_SendBuffer(uint8_t * bufferPointer)
 				}   
 			}    
 			else 
-			{
-				
+			{ 				
 				if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1) != 1) 
 				{
 					CeDigitalWrite(HIGH);	// ce ==> HIGH, max 10 ms
-				}
-				
+				} 				
  			}	
 				DataBuffer_Process();
 		}
@@ -261,8 +280,9 @@ void NRF_SendBuffer(uint8_t * bufferPointer)
 		DataBuffer_Process();
 	} 	
 	CeDigitalWrite(LOW);
+	Spi1Send8Bit( &flushRxFifo, 1 );
   Spi1Send8Bit( receiveMode, sizeof(receiveMode) );
-	Spi1Send8Bit( &flushTxFifo, 1 );
+  CeDigitalWrite(HIGH);   
 }
 
 
@@ -310,6 +330,50 @@ static void RegisterInit(void)
 	Spi1Send8Bit(	&flushTxFifo, 	1											);
 	Spi1Send8Bit(	receiveMode, 	  sizeof(receiveMode)	  );
 	CeDigitalWrite(HIGH);
+}
+
+static uint8_t reception = 0, readStatus = R_REGISTER | STATUS;
+static uint8_t ReadPayload[39], Payload[39];
+// **************************************************************
+// 					Check_Reception
+// **************************************************************
+void Check_Reception(void)
+{ 
+  Spi1ReturnSend8Bit(&readStatus, &reception, 1);
+  if(reception & (1<<6))
+  {
+    ReadPayload[0] = R_RX_PAYLOAD;
+    Spi1ReturnSend8Bit(ReadPayload, Payload,  sizeof(ReadPayload));
+    if (ReadPayload[10] & 0x07)
+    {
+       NRF_DataStateFLAG = 1;
+       NRF_DataState = (DataStateTypeDef) (ReadPayload[1] & 0x07);
+    }
+  } 
+  Spi1Send8Bit( &flushRxFifo, 1 );
+}
+
+
+// **************************************************************
+// 					NRF_CheckChange
+// **************************************************************
+uint8_t NRF_CheckChange(void)
+{ 
+    if(NRF_DataStateFLAG)
+    {
+      NRF_DataStateFLAG = 0;
+      return 1;
+    }
+    else 
+      return 0;
+}
+
+// **************************************************************
+// 					NRF_GetDataState
+// **************************************************************
+DataStateTypeDef NRF_GetDataState(void)
+{
+    return NRF_DataState;
 }
 
 // **************************************************************

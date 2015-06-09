@@ -2,9 +2,6 @@
 #ifndef __COMMONDEFINE_H__
 #define __COMMONDEFINE_H__
 
-//#define DEBUG 
-
-#define COMPRESS // enable compression
 #define TESTBUFFER
 
 #define LOW		0
@@ -30,4 +27,19 @@
 #define	SIZE_VALUE	 	 25
 #define INTERVAL_TEST  25
 #define SIZE_TEST			(SIZE_VALUE * INTERVAL_TEST)
+
+/**************************************************************/
+//					Enum
+/**************************************************************/
+typedef enum
+{
+	__8ch_16bit_20kHz__C__ = 0x01,
+	__4ch_16bit_20kHz_NC__ = 0x02,
+	__8ch_16bit_10kHz_NC__ = 0x03,
+  __8ch_8bit__20kHz_NC__ = 0x04,
+  
+} DataStateTypeDef;
+
+#define FIRST_STATE	__8ch_16bit_10kHz_NC__
+
 #endif

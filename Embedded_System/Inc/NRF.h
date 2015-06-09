@@ -43,6 +43,8 @@ static void CsnDigitalWrite(uint8_t state);
 // SPI Communication functions
 /**************************************************************/
 // transmit and receive 8 bits datas with SPI1 
+static void Spi1ReturnSend8Bit(uint8_t * dataTo, uint8_t * dataFrom, uint8_t length);
+// transmit and receive 8 bits datas with SPI1 
 static void Spi1Send8Bit(uint8_t * data, uint8_t length);
 // transmit a 8 bits data command before a DMA transfer
 static void Spi1Send8BitThenDma (uint8_t * data, uint8_t length);
@@ -52,12 +54,17 @@ static void Spi1DmaSend(uint8_t * addr);
 void DMA1_Channel2_3_IRQHandler(void);
 // send samples over air
 void NRF_SendBuffer(uint8_t * bufferPointer);
-
+// check the RX buffer 
+void Check_Reception(void);
 /**************************************************************/
 // NRF functions
 /**************************************************************/
 // function used to test the spi of the NRF
 static void RegisterInit(void);
+// function used by the main program to check wether we receive order from the base
+uint8_t NRF_CheckChange(void);
+// getter for
+DataStateTypeDef NRF_GetDataState(void);
 // test the nrf (ask for the adress pipe 2
 void NRF_Test(void);
 

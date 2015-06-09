@@ -4,6 +4,10 @@
 #include "board_interface.h"
 #include "CommonDefine.h"
 
+static void ChangeDataState(void);
+
+DataStateTypeDef DataState = FIRST_STATE;
+
 int main(void)
 {
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -20,11 +24,34 @@ int main(void)
 	
 	SampleSend_Enable(HIGH);
 	
+  //ChangeDataState();
+  
 	while (1)
   {
 		SampleSend_Acquisition();
 		DataBuffer_Process();
+    if(NRF_CheckChange()) 
+      ChangeDataState();  
   } 
 }
+
+static void ChangeDataState(void)
+{
+  DataState = NRF_GetDataState();
+  DataBuffer_ChangeState(DataState);
+  SampleSend_SetState(DataState);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 

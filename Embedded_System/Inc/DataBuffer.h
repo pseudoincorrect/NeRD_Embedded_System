@@ -25,7 +25,9 @@ typedef struct
 	uint16_t Write8_element;
 	// Indice to the current buffer the NRF is sending
 	uint16_t Read8_index;
-	
+  
+  DataStateTypeDef DataState;
+  
 }DataBuffer;
 
 
@@ -55,6 +57,9 @@ static void  DataBuffer_ApplyReset(void);
 
 // compress a block of datas if available
 void DataBuffer_Process(void);
+
+// change the data setting (compression, refresh rate, channel number)
+void DataBuffer_ChangeState(DataStateTypeDef DataState);
 
 #endif
 

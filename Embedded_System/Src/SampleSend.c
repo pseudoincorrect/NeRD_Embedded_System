@@ -1,5 +1,7 @@
 #include "SampleSend.h"
 
+static DataStateTypeDef DataState = FIRST_STATE;
+
 volatile uint32_t Tim1DIER;
 volatile uint32_t Tim1SR;
 	
@@ -14,7 +16,7 @@ void SampleSend_Init(void)
 	RHD_Init();
 	DataBuffer_Init();
 	FBAR_Init();
-	TIM2Init (250,10); //(260,9); // (268,8) =  20 kHz sample
+	TIM2Init (250,20); //(260,9); // (268,8) =  20 kHz sample
 }
 
 /**************************************************************/
@@ -90,7 +92,17 @@ void SampleSend_Acquisition(void)
 	}
 }
 
-
+/**************************************************************/
+//					SampleSend_SetState
+/**************************************************************/
+void SampleSend_SetState(DataStateTypeDef State)
+{
+   DataState = State;
+   if(DataState == __8ch_16bit_10kHz_NC__)
+     TIM2Init (250,20); //(260,9); // (268,8) =  20 kHz sample
+    else
+      TIM2Init (250,10); //(260,9); // (268,8) =  20 kHz sample
+}
 
 
 

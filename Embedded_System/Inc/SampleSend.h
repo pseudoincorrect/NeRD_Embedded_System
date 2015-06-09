@@ -38,5 +38,7 @@ void SampleSend_Enable(uint8_t state);
 // Main sampling function
 void SampleSend_Acquisition(void);
 
+void SampleSend_SetState(DataStateTypeDef State);
+
 #endif
 
