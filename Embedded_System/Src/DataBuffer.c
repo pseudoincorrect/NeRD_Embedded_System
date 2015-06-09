@@ -121,8 +121,7 @@ void  DataBuffer_ApplyReset(void)
 	FBAR_Reset(DataBufferRead16(), &ElectrophyData.Data8[ElectrophyData.Write8_index][0] );	; 
 }
 
-static uint16_t * DataBufferRead16ptr;
-static uint8_t  * DataBufferWrite8ptr;
+static uint8_t processus;
 /**************************************************************/
 //					DataBuffer_Process
 /**************************************************************/
@@ -130,6 +129,11 @@ void DataBuffer_Process(void)
 {
 	if(DataBuffer_Data16_CheckFill())
 	{
+    uint16_t * DataBufferRead16ptr;
+    uint8_t  * DataBufferWrite8ptr;
+    
+    DEBUG_HIGH;
+    
     if(ElectrophyData.DataState == __8ch_16bit_20kHz__C__)  // if Compression
     {
       if(ElectrophyData.Write8_element)
@@ -142,18 +146,19 @@ void DataBuffer_Process(void)
        DataBufferRead16ptr = DataBufferRead16();
        DataBufferWrite8ptr = DataBufferWrite8();
       
-       FBAR_Dissemble(DataBufferRead16ptr, DataBufferWrite8ptr);			
+       FBAR_Dissemble(DataBufferRead16ptr, DataBufferWrite8ptr, ElectrophyData.DataState);			
       
        // if we send 8 channels of 16 bit ,and not 4, it will take twice more place
        // on the sending buffer , thius we call "DataBufferWrite8()" twice
        if(ElectrophyData.DataState == __8ch_16bit_10kHz_NC__)
        {
          DataBufferWrite8ptr = DataBufferWrite8();
-         DataBufferRead16ptr += CHANNEL_SIZE;
+         DataBufferRead16ptr += CHANNEL_SIZE/2;
          
-         FBAR_Dissemble(DataBufferRead16ptr, DataBufferWrite8ptr);      
+         FBAR_Dissemble(DataBufferRead16ptr, DataBufferWrite8ptr, ElectrophyData.DataState);      
        }
-    }	
+    }
+    DEBUG_LOW;
 	}
 }
 

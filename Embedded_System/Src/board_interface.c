@@ -79,19 +79,8 @@ static void GpioInit(void)
   //******************* Debug pin (USR)
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Pin = GPIO_PIN_15;
+  GPIO_InitStruct.Pin = GPIO_PIN_3;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-//	 /* Configure PA.15 pin (USR) as input floating */
-//  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-//  GPIO_InitStruct.Pull = GPIO_NOPULL;
-//  GPIO_InitStruct.Pin = GPIO_PIN_15;
-//  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-//  /* Enable and set EXTI line 0 Interrupt to the lowest priority */
-//  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 3, 0);
-//  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
-
 }
 
 extern uint8_t decal; // Décalage à bariller des donnes de la RHD

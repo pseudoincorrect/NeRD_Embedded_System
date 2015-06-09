@@ -117,8 +117,7 @@ void SPI2_IRQHandler()
 	// If RX buffer is NOT empty then write it to the buffer
 	if (SPI2->SR & SPI_FLAG_RXNE)
 	{
-			//*bufferSample++ = (((SPI2->DR) >> decal) & 0x00FF ); // send SPI data to the buffer
-			*bufferSample++ = (SPI2->DR) >> 1;
+			*bufferSample++ = (SPI2->DR);
 	}
 	// If SPI is not busy then we have finished sending data
 	if (!(SPI2->SR & SPI_FLAG_BSY))

@@ -141,22 +141,36 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 // function used in NO-compression mode, it will merge the  
 // uint8_t data into a 16bit array
 /**************************************************************************/
-void FBAR_Dissemble(uint16_t * bufferFrom, uint8_t * bufferTo)
+void FBAR_Dissemble(uint16_t * bufferFrom, uint8_t * bufferTo, DataStateTypeDef DataState)
 {
 	uint16_t i;
 	
-  #pragma unroll_completely 
-  for(i=0; i < (CHANNEL_SIZE/2); i++)
+  if(DataState == __8ch_8bit__20kHz_NC__)
   {
-    *bufferTo = *bufferFrom >> 8;
-    
-    bufferTo++;
-    
-    *bufferTo = (*bufferFrom) & 0xFF;
-    
-    bufferTo++;
-    bufferFrom++;
-  }         
+    #pragma unroll_completely 
+    for(i=0; i < (CHANNEL_SIZE); i++)
+    {
+      *bufferTo = (*bufferFrom >> 8)  & 0xFF;
+      
+      bufferTo++;
+      bufferFrom++;
+    } 
+  }
+  else
+  {
+    #pragma unroll_completely 
+    for(i=0; i < (CHANNEL_SIZE/2); i++)
+    {
+      *bufferTo = (*bufferFrom >> 8)  & 0xFF;
+      
+      bufferTo++;
+      
+      *bufferTo = (*bufferFrom) & 0xFF;
+      
+      bufferTo++;
+      bufferFrom++;
+    } 
+  }
 }
 
 
