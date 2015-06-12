@@ -10,9 +10,9 @@
 typedef struct
 {
 	// Buffer that contain brut RHD datas
-	uint16_t Data16[SIZE_BUFFER_RHD][CHANNEL_SIZE]; 
+	uint16_t Data16[SIZE_BUFFER_RHD + 1][CHANNEL_SIZE]; 
 	// Buffer that contain compressed RHD datas
-	uint8_t  Data8[SIZE_BUFFER_NRF][SAMPLE_BUFFER_SIZE];
+	uint8_t  Data8[SIZE_BUFFER_NRF + 1][SAMPLE_BUFFER_SIZE];
 
 	// Indice to the current write index of the RHD buffer
 	uint16_t Write16_index;
@@ -25,9 +25,7 @@ typedef struct
 	uint16_t Write8_element;
 	// Indice to the current buffer the NRF is sending
 	uint16_t Read8_index;
-  
-  DataStateTypeDef DataState;
-  
+   
 }DataBuffer;
 
 
@@ -59,7 +57,7 @@ static void  DataBuffer_ApplyReset(void);
 void DataBuffer_Process(void);
 
 // change the data setting (compression, refresh rate, channel number)
-void DataBuffer_ChangeState(DataStateTypeDef DataState);
+void DataBuffer_ChangeState(DataStateTypeDef State);
 
 #endif
 

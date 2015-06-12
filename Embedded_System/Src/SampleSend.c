@@ -15,7 +15,6 @@ void SampleSend_Init(void)
 	NRF_Init();
 	RHD_Init();
 	DataBuffer_Init();
-	FBAR_Init();
 	SampleSend_SetState(DataState);
 }
 
@@ -100,12 +99,10 @@ void SampleSend_SetState(DataStateTypeDef State)
   DataState = State;
 
   if(DataState == __8ch_16bit_10kHz_NC__)
-     TIM2Init (250,20); //(260,9); // (268,8) =  20 kHz sample
+     TIM2Init (250,20); 
    else
      TIM2Init (250,10); //(260,9); // (268,8) =  20 kHz sample
 }
-
-
 
 
 

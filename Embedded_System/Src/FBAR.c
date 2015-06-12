@@ -106,11 +106,11 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 				if(j == (CUT_VAL_SIZE-1))
 				{
 					// on controle que les cutvalues ne dépassent pas l2^16
-					if (cutValue[i][CUT_VAL_SIZE-1] <  65500 - ETA) 
+					if (cutValue[i][CUT_VAL_SIZE-1] <  65000 - ETA) 
 						cutValue[i][j] += etaAdd[j];
 				}
 				// anti chevauchement (et compilation warning j+1, depassement range tableau, secu à prévoir)
-				else if(cutValue[i][j+1] - cutValue[i][j] >= etaAdd[j]) 
+				else if((cutValue[i][j+1] - cutValue[i][j]) >= etaAdd[j] + SECU) 
 				{
 					cutValue[i][j] += etaAdd[j];	
 				}
@@ -121,11 +121,11 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 				if (!j)
 				{
 					// on controle que les cutvalues ne dépassent pas 0 en négatif
-					if (cutValue[i][0] > ETA) 
+					if (cutValue[i][0] > ETA + SECU * 5) 
 						cutValue[i][0] -= etaSous[0];	
 				}
 				// anti chevauchement (et compilation warning j-1, depassement negatif range tableau, secu à prévoir)
-				else if ((cutValue[i][j] - cutValue[i][j-1] >= etaSous[j]))  
+				else if (((cutValue[i][j] - cutValue[i][j-1]) >= etaSous[j] + SECU))  
 				{
 					cutValue[i][j] -=  etaSous[j];	
 				}

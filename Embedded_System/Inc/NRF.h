@@ -42,6 +42,10 @@ static void CsnDigitalWrite(uint8_t state);
 /**************************************************************/
 // SPI Communication functions
 /**************************************************************/
+
+static void Spi1Send(uint16_t * dataTo, uint16_t * dataFrom, uint8_t length);
+
+
 // transmit and receive 8 bits datas with SPI1 
 static void Spi1ReturnSend8Bit(uint8_t * dataTo, uint8_t * dataFrom, uint8_t length);
 // transmit and receive 8 bits datas with SPI1 

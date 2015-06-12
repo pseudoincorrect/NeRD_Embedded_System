@@ -6,7 +6,7 @@
 
 static void ChangeDataState(void);
 
-DataStateTypeDef DataState = FIRST_STATE;
+volatile static DataStateTypeDef DataState = FIRST_STATE;
 
 int main(void)
 {
@@ -23,8 +23,6 @@ int main(void)
 	SampleSend_Init();
 	
 	SampleSend_Enable(HIGH);
-	
-  //ChangeDataState();
   
 	while (1)
   {
@@ -37,9 +35,13 @@ int main(void)
 
 static void ChangeDataState(void)
 {
+  SampleSend_Enable(LOW);
+  
   DataState = NRF_GetDataState();
   DataBuffer_ChangeState(DataState);
   SampleSend_SetState(DataState);
+  
+  SampleSend_Enable(HIGH);
 }
 
 

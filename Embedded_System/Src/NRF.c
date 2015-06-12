@@ -134,6 +134,26 @@ static void CsnDigitalWrite(uint8_t state)
 }
 
 static uint8_t indexSpi1;
+
+// **************************************************************
+//					Spi1Send 
+// **************************************************************
+static void Spi1Send(uint16_t * dataTo, uint16_t * dataFrom, uint8_t length)
+{	
+	CsnDigitalWrite(LOW);
+	
+	for (indexSpi1=0; indexSpi1<length; indexSpi1++) 
+	{
+		SPI1->DR = *(dataTo+indexSpi1);
+		while( !(SPI1->SR & SPI_FLAG_TXE) ); 	// wait until transmit complete
+		while( !(SPI1->SR & SPI_FLAG_RXNE) ); // wait until receive complete
+		while( SPI1->SR & SPI_FLAG_BSY ); 		// wait until SPI is not busy anymore
+	  *(dataFrom+indexSpi1) = (SPI1->DR);
+  }
+	CsnDigitalWrite(HIGH);
+}
+
+
 // **************************************************************
 //					Spi1ReturnSend8Bit 
 // **************************************************************
@@ -147,7 +167,7 @@ static void Spi1ReturnSend8Bit(uint8_t * dataTo, uint8_t * dataFrom, uint8_t len
 		while( !(SPI1->SR & SPI_FLAG_TXE) ); 	// wait until transmit complete
 		while( !(SPI1->SR & SPI_FLAG_RXNE) ); // wait until receive complete
 		while( SPI1->SR & SPI_FLAG_BSY ); 		// wait until SPI is not busy anymore
-	  *(dataFrom+indexSpi1) = *((__IO uint8_t*)(&(SPI1->DR)));
+	  *(dataFrom+indexSpi1) = (SPI1->DR) & 0xFF;
   }
 	CsnDigitalWrite(HIGH);
 }
@@ -230,9 +250,9 @@ void DMA1_Channel2_3_IRQHandler(void)
 	DMA1->IFCR |= (uint32_t) DMA_IFCR_CTCIF3;	
 }		
 
-static uint8_t transmitMode[2] = {W_REGISTER | CONFIG, 0x52};
-static uint8_t clearIrqFlag[2] = {W_REGISTER | STATUS, 0x70};
-static uint8_t receiveMode[2]  = {W_REGISTER | CONFIG, 0x33};
+static uint8_t transmitMode[2]  = {W_REGISTER | CONFIG, 0x52};
+static uint8_t clearIrqFlag[2]  = {W_REGISTER | STATUS, 0x60};
+static uint8_t receiveMode[2]   = {W_REGISTER | CONFIG, 0x33};
 static uint8_t flushTxFifo		 	= FLUSH_TX;
 static uint8_t flushRxFifo		 	= FLUSH_RX;
 static uint8_t packetSent 			= 0;	// number of packet sent
@@ -280,8 +300,11 @@ void NRF_SendBuffer(uint8_t * bufferPointer)
 		DataBuffer_Process();
 	} 	
 	CeDigitalWrite(LOW);
-	Spi1Send8Bit( &flushRxFifo, 1 );
+	
   Spi1Send8Bit( receiveMode, sizeof(receiveMode) );
+  Spi1Send8Bit( &flushRxFifo, 1 );
+  Spi1Send8Bit( clearIrqFlag, sizeof(clearIrqFlag) );
+  
   CeDigitalWrite(HIGH);   
 }
 
@@ -293,27 +316,29 @@ static void RegisterInit(void)
 {
 	//declaration of instruction to send to the NRF
 	// disable auto acknowledgement
-	static uint8_t disableAutoAck[2] 	= {W_REGISTER | EN_AA 		 , 0x00};
+	uint8_t disableAutoAck[2] 	= {W_REGISTER | EN_AA 		 , 0x00};
 	// set size payload 32 byte
-	static uint8_t rxPayloadSize[2] 	= {W_REGISTER | RX_PW_P0   , 32  };
+	uint8_t rxPayloadSize[2] 	= {W_REGISTER | RX_PW_P0   , 32  };
 	// set pipe enabled  0b 0000 0001 (pipe 0 enabled)
-	static uint8_t rxPipe[2] 					= {W_REGISTER | EN_RXADDR  , 0x01};
+	uint8_t rxPipe[2] 					= {W_REGISTER | EN_RXADDR  , 0x01};
 	// set size adresse RX 3 byte
-	static uint8_t rxTxAdressSize[2] 	= {W_REGISTER | SETUP_AW   , 0x01};
+	uint8_t rxTxAdressSize[2] 	= {W_REGISTER | SETUP_AW   , 0x01};
 	// set RX ADDR P0
-	static uint8_t rxAdressP0[6] 			= {W_REGISTER | RX_ADDR_P0 , 0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
+	uint8_t rxAdressP0[6] 			= {W_REGISTER | RX_ADDR_P0 , 0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
 		// set RX ADDR P0
-	static uint8_t txAdress[6]  			= {W_REGISTER | TX_ADDR 	 , 0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
+	uint8_t txAdress[6]  			= {W_REGISTER | TX_ADDR 	 , 0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
 	// set RF chanel 		 0b 0000 0010 (2400 MHz + 2 MHz) 
-	static uint8_t rfChanel[2] 				= {W_REGISTER | RF_CH 		 , 0x02};
+	uint8_t rfChanel[2] 				= {W_REGISTER | RF_CH 		 , 0x02};
 	// set RF parameters 0b 0000 1110 (2Mbps, 0dB)
-	static uint8_t rfParameter[2] 		= {W_REGISTER | RF_SETUP   , 0x0E};
+	uint8_t rfParameter[2] 		= {W_REGISTER | RF_SETUP   , 0x0E};
 	// set Receive mode  0b 0011 0011 
-	static uint8_t receiveMode[2] 		= {W_REGISTER | CONFIG		 , 0x33};
+	uint8_t receiveMode[2] 		= {W_REGISTER | CONFIG		 , 0x33};
+  // clear IRQ
+	uint8_t clearIrq[2] 		  	= {W_REGISTER | STATUS		 , 0x60};
 	// flush Rx fifo
-	static uint8_t flushRxFifo 				= FLUSH_RX;
+	uint8_t flushRxFifo 				= FLUSH_RX;
 	// flush Tx fifo
-	static uint8_t flushTxFifo				= FLUSH_TX;
+	uint8_t flushTxFifo				= FLUSH_TX;
 	
 	CeDigitalWrite(LOW);
 	
@@ -326,31 +351,34 @@ static void RegisterInit(void)
 	Spi1Send8Bit(	txAdress,   		sizeof(txAdress)			);
 	Spi1Send8Bit(	rfChanel, 			sizeof(rfChanel)			);
 	Spi1Send8Bit(	rfParameter, 		sizeof(rfParameter)		);
+  Spi1Send8Bit(	clearIrq, 		  sizeof(clearIrq)		  );
 	Spi1Send8Bit(	&flushRxFifo, 	1											);
 	Spi1Send8Bit(	&flushTxFifo, 	1											);
 	Spi1Send8Bit(	receiveMode, 	  sizeof(receiveMode)	  );
 	CeDigitalWrite(HIGH);
 }
 
-static uint8_t reception = 0, readStatus = R_REGISTER | STATUS;
-static uint8_t ReadPayload[39], Payload[39];
+static uint8_t reception, readStatus = R_REGISTER | STATUS;
+static uint8_t ReadPayload[33], Payload[33];
 // **************************************************************
 // 					Check_Reception
 // **************************************************************
 void Check_Reception(void)
 { 
-  Spi1ReturnSend8Bit(&readStatus, &reception, 1);
-  if(reception & (1<<6))
+  Spi1Send8Bit(&readStatus, 1 );
+  //Spi1Send(&readStatus, &reception, 1);
+  if((SPI1->DR) & (1<<6))
   {
     ReadPayload[0] = R_RX_PAYLOAD;
     Spi1ReturnSend8Bit(ReadPayload, Payload,  sizeof(ReadPayload));
-    if (ReadPayload[10] & 0x07)
+    if ((Payload[10] < 0x05) && (Payload[10] > 0) && (Payload[11] < 0x05) && (Payload[11] > 0))
     {
        NRF_DataStateFLAG = 1;
-       NRF_DataState = (DataStateTypeDef) (ReadPayload[1] & 0x07);
+       NRF_DataState = (DataStateTypeDef) (Payload[10] & 0x07);
     }
-  } 
+  }   
   Spi1Send8Bit( &flushRxFifo, 1 );
+  Spi1Send8Bit( clearIrqFlag, sizeof(clearIrqFlag) );
 }
 
 
