@@ -19,7 +19,8 @@
 #define NBIT 				 	 3								 // resolution of the compression
 #define POW_2_NBIT  	(1 << NBIT) 			// 2^NBIT
 #define CUT_VAL_SIZE 	(POW_2_NBIT - 1) // number of cut value
-#define ETA					 	 3000					// adaptation parameter
+//#define ETA					 	 3000					// adaptation parameter
+#define ETA_INDEX_INIT 150					// adaptation parameter
 #define SECU           500
 
 #define DEBUG_HIGH 	(GPIOA->BSRR |= GPIO_PIN_3)

@@ -67,5 +67,6 @@ void RHD_Sample(uint16_t * buffer);
 // 3) increasing differtent triangles per channel 
 void RHD_SampleTest(uint16_t * buffer, uint8_t test); 
 
+void RHD_Test(void);
 
 #endif

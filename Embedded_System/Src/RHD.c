@@ -39,6 +39,7 @@ void RHD_Init(void)
   Spi2Init();
 	RegisterInit();
 	InitTestBuffer();
+  RHD_Test();
 }
 
 // **************************************************************
@@ -66,10 +67,10 @@ static void GPIOInit(void)
 		
 	// Configure the chip SELECT pin 
 	// PF7 = CSN
-	GPIO_InitStructure.Pin 		= GPIO_PIN_7;
+	GPIO_InitStructure.Pin 		= GPIO_PIN_12;
 	GPIO_InitStructure.Mode 	= GPIO_MODE_OUTPUT_PP;
-	HAL_GPIO_Init(GPIOF, &GPIO_InitStructure);	
-	GPIOF->BSRR |= (uint32_t) GPIO_PIN_7; // set PF7 HIGH	
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);	
+	GPIOB->BSRR |= (uint32_t) GPIO_PIN_12; // set PF7 HIGH	
 }		
 
 static SPI_HandleTypeDef SpiHandle;
@@ -161,8 +162,8 @@ uint16_t	Spi2ReturnSend(uint16_t data)
 /**************************************************************/
 static void CsnDigitalWrite(uint8_t state)
 {
-	if (state)  GPIOF->BSRR |= GPIO_PIN_7;
-	else 				GPIOF->BSRR |= (uint32_t) (GPIO_PIN_7 << 16); 
+	if (state)  GPIOB->BSRR |= GPIO_PIN_12;
+	else 				GPIOB->BSRR |= (uint32_t) (GPIO_PIN_12 << 16); 
 }
 
 /**************************************************************/
@@ -322,5 +323,25 @@ void RHD_SampleTest(uint16_t * buffer, uint8_t test)
 			break;	
 	}		
 }	
+
+static uint16_t Dat[5];
+/**************************************************************/
+//	 				RHD_Test
+/**************************************************************/
+void RHD_Test(void)
+{
+  uint16_t i,j;
+
+  for(i=0; i<3; i++)
+    for(j=0; j<5; j++)
+      Dat[j] = Spi2ReturnSend(MASK_READ | ((0x28 + j) << 8) ); 
+   
+  __nop();
+}  
+
+
+
+
+
 
 

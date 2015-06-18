@@ -1,7 +1,8 @@
 #include "NRF.h"
 
-static DataStateTypeDef NRF_DataState = FIRST_STATE;
-static uint8_t NRF_DataStateFLAG = 0;
+static DataStateTypeDef DataState = FIRST_STATE;
+static uint8_t EtaIndex;
+static uint8_t DataStateFLAG = 0;
 // **************************************************************
 // 	 				NRF_Init 
 // **************************************************************
@@ -134,26 +135,6 @@ static void CsnDigitalWrite(uint8_t state)
 }
 
 static uint8_t indexSpi1;
-
-// **************************************************************
-//					Spi1Send 
-// **************************************************************
-static void Spi1Send(uint16_t * dataTo, uint16_t * dataFrom, uint8_t length)
-{	
-	CsnDigitalWrite(LOW);
-	
-	for (indexSpi1=0; indexSpi1<length; indexSpi1++) 
-	{
-		SPI1->DR = *(dataTo+indexSpi1);
-		while( !(SPI1->SR & SPI_FLAG_TXE) ); 	// wait until transmit complete
-		while( !(SPI1->SR & SPI_FLAG_RXNE) ); // wait until receive complete
-		while( SPI1->SR & SPI_FLAG_BSY ); 		// wait until SPI is not busy anymore
-	  *(dataFrom+indexSpi1) = (SPI1->DR);
-  }
-	CsnDigitalWrite(HIGH);
-}
-
-
 // **************************************************************
 //					Spi1ReturnSend8Bit 
 // **************************************************************
@@ -167,7 +148,7 @@ static void Spi1ReturnSend8Bit(uint8_t * dataTo, uint8_t * dataFrom, uint8_t len
 		while( !(SPI1->SR & SPI_FLAG_TXE) ); 	// wait until transmit complete
 		while( !(SPI1->SR & SPI_FLAG_RXNE) ); // wait until receive complete
 		while( SPI1->SR & SPI_FLAG_BSY ); 		// wait until SPI is not busy anymore
-	  *(dataFrom+indexSpi1) = (SPI1->DR) & 0xFF;
+	  *(dataFrom+indexSpi1) = *((__IO uint8_t*)(&(SPI1->DR))) & 0xFF;
   }
 	CsnDigitalWrite(HIGH);
 }
@@ -358,23 +339,29 @@ static void RegisterInit(void)
 	CeDigitalWrite(HIGH);
 }
 
-static uint8_t reception, readStatus = R_REGISTER | STATUS;
+static uint8_t DataRecep, Reception, ReadStatus = R_REGISTER | STATUS;
 static uint8_t ReadPayload[33], Payload[33];
 // **************************************************************
 // 					Check_Reception
 // **************************************************************
 void Check_Reception(void)
 { 
-  Spi1Send8Bit(&readStatus, 1 );
-  //Spi1Send(&readStatus, &reception, 1);
-  if((SPI1->DR) & (1<<6))
+  Spi1ReturnSend8Bit(&ReadStatus, &Reception, 1);
+  if(Reception & (1<<6))
   {
     ReadPayload[0] = R_RX_PAYLOAD;
     Spi1ReturnSend8Bit(ReadPayload, Payload,  sizeof(ReadPayload));
-    if ((Payload[10] < 0x05) && (Payload[10] > 0) && (Payload[11] < 0x05) && (Payload[11] > 0))
+    if (Payload[11] == (Payload[10] + 1)) //&& (Payload[13] == Payload[12] + 1))
     {
-       NRF_DataStateFLAG = 1;
-       NRF_DataState = (DataStateTypeDef) (Payload[10] & 0x07);
+       DataStateFLAG = 1;
+       DataRecep = Payload[4];
+       if ((DataRecep > 1) && (DataRecep < 5)) 
+        DataState = (DataStateTypeDef) (DataRecep & 0x07);
+       else if ((DataRecep >= 100) && (DataRecep <= 200))  
+       {
+         DataState = __8ch_16bit_20kHz__C__;
+         EtaIndex = DataRecep;
+       }
     }
   }   
   Spi1Send8Bit( &flushRxFifo, 1 );
@@ -387,9 +374,9 @@ void Check_Reception(void)
 // **************************************************************
 uint8_t NRF_CheckChange(void)
 { 
-    if(NRF_DataStateFLAG)
+    if(DataStateFLAG)
     {
-      NRF_DataStateFLAG = 0;
+      DataStateFLAG = 0;
       return 1;
     }
     else 
@@ -401,7 +388,15 @@ uint8_t NRF_CheckChange(void)
 // **************************************************************
 DataStateTypeDef NRF_GetDataState(void)
 {
-    return NRF_DataState;
+    return DataState;
+}
+
+// **************************************************************
+// 					NRF_GetEta
+// **************************************************************
+uint8_t NRF_GetEtaIndex(void)
+{
+    return EtaIndex;
 }
 
 // **************************************************************
@@ -410,7 +405,7 @@ DataStateTypeDef NRF_GetDataState(void)
 
 void NRF_Test(void)
 {	
-	static uint8_t   Spi1TxBuffer[1 + BYTES_PER_FRAME] = 
+	static uint8_t spi1TxBuffer[1 + BYTES_PER_FRAME] = 
 	{
 	  0xA0, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 
 	  0x07, 0x08, 0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 
@@ -427,7 +422,7 @@ void NRF_Test(void)
 	Spi1Send8Bit(clearIrqF, 	 sizeof(clearIrqF));
 	Spi1Send8Bit(transmitMode, sizeof(transmitMode));
 	
-	Spi1DmaSend(Spi1TxBuffer); 
+	Spi1DmaSend(spi1TxBuffer); 
 
 	CeDigitalWrite(HIGH);	
 }

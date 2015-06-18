@@ -151,21 +151,21 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>DataState</ItemText>
+          <ItemText>Fbar_Eta,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>256</SubType>
-          <ItemText>&amp;DataState</ItemText>
+          <ItemText>&amp;Payload[10]</ItemText>
         </Mm>
       </MemoryWindow1>
       <MemoryWindow2>
         <Mm>
           <WinNumber>2</WinNumber>
           <SubType>0</SubType>
-          <ItemText>&amp;DataState</ItemText>
+          <ItemText>&amp;Reception</ItemText>
         </Mm>
       </MemoryWindow2>
       <MemoryWindow3>

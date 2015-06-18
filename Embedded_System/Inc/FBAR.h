@@ -13,7 +13,7 @@
 #include <math.h>
 #include <CommonDefine.h>
 
-void FBAR_Init(void);
+void FBAR_Init(uint8_t EtaIndex);
 
 void FBAR_Reset(uint16_t * bufferFrom, uint8_t * bufferTo);
 

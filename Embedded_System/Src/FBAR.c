@@ -1,12 +1,13 @@
 #include "FBAR.h"
 
-volatile uint16_t cutValue[CHANNEL_SIZE][CUT_VAL_SIZE] = {0};
+volatile uint16_t cutValue[CHANNEL_SIZE][CUT_VAL_SIZE + 1] = {0}; // (CUT_VAL_SIZE + 1) : we add 1 to avoid the warning out of range line 115
 
-volatile uint16_t etaAdd[CUT_VAL_SIZE]={0};
-volatile uint16_t etaSous[CUT_VAL_SIZE]={0};
+volatile uint16_t Fbar_EtaAdd[CUT_VAL_SIZE]={0};
+volatile uint16_t Fbar_EtaSous[CUT_VAL_SIZE]={0};
 	
 uint16_t range; // range RHD ADC ==> 2^16 - 1 
 uint16_t delta; // initial resolution compression = range / number of cut value
+volatile uint16_t Fbar_Eta;
 
 volatile uint16_t nbit, pow2, cutvalsize;
 
@@ -18,17 +19,22 @@ cut val i :							0					1					2
 winner :					00				01				10				11
 Delta	 :			|---------|
 
-etaAdd  [0] = ETA/1			[1] =	ETA/2			[2] =	ETA/3		
-etaSous [0] = ETA/3			[1] =	ETA/2			[2] =	ETA/1	
+Fbar_EtaAdd  [0] = Fbar_Eta/1			[1] =	Fbar_Eta/2			[2] =	Fbar_Eta/3		
+Fbar_EtaSous [0] = Fbar_Eta/3			[1] =	Fbar_Eta/2			[2] =	Fbar_Eta/1	
 */
 
 /**************************************************************************/
 //					FBAR_Init
 /**************************************************************************/
-void FBAR_Init(void)
+void FBAR_Init(uint8_t Fbar_EtaIndex)
 {
 	uint16_t i,j;
-	
+  
+	if (Fbar_EtaIndex < 100)
+    Fbar_EtaIndex = 100;
+  
+  Fbar_Eta = (Fbar_EtaIndex - 100) * 50;
+  
 	nbit = NBIT;	
 	pow2 = POW_2_NBIT;
 	cutvalsize = CUT_VAL_SIZE;
@@ -44,8 +50,8 @@ void FBAR_Init(void)
 	//initialize the adaptation parameters
 	for (i=0; i < CUT_VAL_SIZE; i++)
 	{
-		etaSous[i] = ETA / (i + 1);
-		etaAdd[i]  = ETA / (CUT_VAL_SIZE - i);
+		Fbar_EtaSous[i] = Fbar_Eta / (i + 1);
+		Fbar_EtaAdd[i]  = Fbar_Eta / (CUT_VAL_SIZE - i);
 	}
 }
 
@@ -106,13 +112,15 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 				if(j == (CUT_VAL_SIZE-1))
 				{
 					// on controle que les cutvalues ne dépassent pas l2^16
-					if (cutValue[i][CUT_VAL_SIZE-1] <  65000 - ETA) 
-						cutValue[i][j] += etaAdd[j];
+          if (cutValue[i][CUT_VAL_SIZE-1] <   65535 - (5 * SECU) - Fbar_Eta) 
+						cutValue[i][CUT_VAL_SIZE-1] += Fbar_Eta;
+
 				}
 				// anti chevauchement (et compilation warning j+1, depassement range tableau, secu à prévoir)
-				else if((cutValue[i][j+1] - cutValue[i][j]) >= etaAdd[j] + SECU) 
+				else 
+          if((cutValue[i][j+1] - cutValue[i][j]) >= Fbar_EtaAdd[j] + SECU) 
 				{
-					cutValue[i][j] += etaAdd[j];	
+					cutValue[i][j] += Fbar_EtaAdd[j];	
 				}
 				winner = j+1; 
 			}
@@ -121,13 +129,13 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 				if (!j)
 				{
 					// on controle que les cutvalues ne dépassent pas 0 en négatif
-					if (cutValue[i][0] > ETA + SECU * 5) 
-						cutValue[i][0] -= etaSous[0];	
+           if (cutValue[i][0] > Fbar_Eta+ (5 * SECU))  
+						cutValue[i][0] -= Fbar_Eta;        
 				}
 				// anti chevauchement (et compilation warning j-1, depassement negatif range tableau, secu à prévoir)
-				else if (((cutValue[i][j] - cutValue[i][j-1]) >= etaSous[j] + SECU))  
+				else if (((cutValue[i][j] - cutValue[i][j-1]) >= Fbar_EtaSous[j] + SECU))  
 				{
-					cutValue[i][j] -=  etaSous[j];	
+					cutValue[i][j] -=  Fbar_EtaSous[j];	
 				}
 			}
 		}	

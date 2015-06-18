@@ -10,7 +10,7 @@ volatile uint16_t * RHDptr;
 /**************************************************************/
 //					DataBuffer_Init
 /**************************************************************/
-void DataBuffer_Init(void)
+void DataBuffer_Init(DataStateTypeDef State, uint8_t EtaIndex)
 {
 	NRFptr = ElectrophyData.Data8[0];
 	RHDptr = ElectrophyData.Data16[0];
@@ -22,7 +22,7 @@ void DataBuffer_Init(void)
 	ElectrophyData.Write8_element	= 0;
 	ElectrophyData.Read8_index 		= 0;
 
-  FBAR_Init();
+  FBAR_Init(EtaIndex);
 }
 
 /**************************************************************/
@@ -178,10 +178,10 @@ void DataBuffer_Process(void)
 /**************************************************************/
 //					DataBuffer_ChangeState
 /**************************************************************/
-void DataBuffer_ChangeState(DataStateTypeDef State)
+void DataBuffer_ChangeState(DataStateTypeDef State, uint8_t Eta)
 {
   DataState = State; 
-  DataBuffer_Init();
+  DataBuffer_Init(State, Eta);
 }
 
 

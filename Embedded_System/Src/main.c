@@ -6,7 +6,11 @@
 
 static void ChangeDataState(void);
 
-volatile static DataStateTypeDef DataState = FIRST_STATE;
+static DataStateTypeDef DataState = FIRST_STATE;
+
+static uint8_t EtaIndex;
+
+extern volatile uint16_t Fbar_Eta;
 
 int main(void)
 {
@@ -37,10 +41,21 @@ static void ChangeDataState(void)
 {
   SampleSend_Enable(LOW);
   
-  DataState = NRF_GetDataState();
-  DataBuffer_ChangeState(DataState);
-  SampleSend_SetState(DataState);
+  if (DataState != NRF_GetDataState())
+  {
+    DataState = NRF_GetDataState();
+    EtaIndex = NRF_GetEtaIndex();
+    SampleSend_SetState(DataState);
+    DataBuffer_ChangeState(DataState, (uint8_t) EtaIndex);
+    SampleSend_SetState(DataState);
+  }
   
+  if ((DataState == __8ch_16bit_20kHz__C__ ) && (EtaIndex != NRF_GetEtaIndex()))
+  {
+    EtaIndex = NRF_GetEtaIndex();
+    DataBuffer_ChangeState(__8ch_16bit_20kHz__C__, (uint8_t) EtaIndex);
+    SampleSend_SetState(__8ch_16bit_20kHz__C__);
+  }   
   SampleSend_Enable(HIGH);
 }
 

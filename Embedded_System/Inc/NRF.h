@@ -69,6 +69,9 @@ static void RegisterInit(void);
 uint8_t NRF_CheckChange(void);
 // getter for
 DataStateTypeDef NRF_GetDataState(void);
+
+uint8_t NRF_GetEtaIndex(void);
+
 // test the nrf (ask for the adress pipe 2
 void NRF_Test(void);
 

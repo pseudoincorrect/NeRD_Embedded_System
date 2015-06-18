@@ -30,7 +30,7 @@ typedef struct
 
 
 //initialize pointers
-void DataBuffer_Init(void);
+void DataBuffer_Init(DataStateTypeDef State, uint8_t EtaIndex);
 
 // check if one buffer is ready for the compression
 static uint8_t DataBuffer_Data16_CheckFill(void);
@@ -57,7 +57,7 @@ static void  DataBuffer_ApplyReset(void);
 void DataBuffer_Process(void);
 
 // change the data setting (compression, refresh rate, channel number)
-void DataBuffer_ChangeState(DataStateTypeDef State);
+void DataBuffer_ChangeState(DataStateTypeDef State, uint8_t Eta);
 
 #endif
 
