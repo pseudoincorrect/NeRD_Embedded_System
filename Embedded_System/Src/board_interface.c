@@ -51,8 +51,7 @@ void SysTick_Handler(void)
 void Board_Init(void)
 {
 	GpioInit();
-	PwmInit();
-	Board_Leds(IDDLE);
+  TIMInit(1000,100);
 }
 
 /**************************************************************/
@@ -63,18 +62,19 @@ static void GpioInit(void)
 	GPIO_InitTypeDef GPIO_InitStruct;
 
   /* TIM3 and GPIO Ports Clock Enable */
-	__TIM3_CLK_ENABLE();
+  __TIM3_CLK_ENABLE();
   __GPIOA_CLK_ENABLE();
   __GPIOB_CLK_ENABLE();
 
 	//******************* LED Pin
-	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-
-	GPIO_InitStruct.Alternate = GPIO_AF1_TIM3;
-  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  GPIO_InitStruct.Pin   =  GPIO_PIN_4;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  
+  GPIOB->BSRR |= (uint32_t) (GPIO_PIN_4 << 16); // set PB_4 LOW
 
   //******************* Debug pin (USR)
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -83,128 +83,61 @@ static void GpioInit(void)
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }
 
-extern uint8_t decal; // Décalage à bariller des donnes de la RHD
-uint8_t toggle = 1;
+static TIM_HandleTypeDef    TimHandle;
 /**************************************************************/
-//					EXTI15_10_IRQHandler
+//					TIM3Init
 /**************************************************************/
-void EXTI4_15_IRQHandler(void)
-{
-	if (EXTI->PR & EXTI_PR_PR15)
-	{
-		decal++;
-		if (decal > 8)
-			decal = 0;
-		
-		if (!decal)
-			Board_Leds(IDDLE);	
-		else
-			Board_Leds(TRANSMITTING);
-		
-		/*if (toggle)	
-		{		
-			toggle = !toggle;
-			BoardState = TRANSMITTING;
-			Board_Leds(BoardState);			
-			SampleSend_Enable(HIGH);
-		}
-		else
-		{
-			toggle = !toggle;			
-			BoardState = IDDLE;
-			Board_Leds(BoardState);			
-			SampleSend_Enable(LOW);			
-		}
-		*/
-	}
-	EXTI->PR = EXTI_PR_PR15;
-}
-
-
-TIM_HandleTypeDef    TimHandle;
-TIM_OC_InitTypeDef 	 sConfig;
-/**************************************************************/
-//					PwmInit
-/**************************************************************/
-static void PwmInit(void)
+static void TIMInit(uint32_t reloadValue, uint16_t prescalerValue)
 {	
 	TimHandle.Instance = TIM3;
 
-  TimHandle.Init.Prescaler         = 0;
-  TimHandle.Init.Period            = 1000;
+	TimHandle.Init.Period            = reloadValue;
+  TimHandle.Init.Prescaler         = prescalerValue;
   TimHandle.Init.ClockDivision     = 0;
   TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
   TimHandle.Init.RepetitionCounter = 0;
-  HAL_TIM_PWM_Init(&TimHandle);
-
-  /*##-2- Configure the PWM channels #########################################*/
-  /* Common configuration for all channels */
-  sConfig.OCMode       = TIM_OCMODE_PWM1;
-  sConfig.OCPolarity   = TIM_OCPOLARITY_HIGH;
-  sConfig.OCFastMode   = TIM_OCFAST_DISABLE;
-  sConfig.OCNPolarity  = TIM_OCNPOLARITY_HIGH;
-  sConfig.OCIdleState  = TIM_OCIDLESTATE_RESET;
-  sConfig.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-
-	sConfig.Pulse = 1000/10;
-  HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_1);
+ 	HAL_TIM_Base_Init(&TimHandle);
+  
+	// Set the TIMx priority 
+	HAL_NVIC_SetPriority(TIM3_IRQn, 2, 0);	
+	// Enable the TIMx global Interrupt 
+  HAL_NVIC_DisableIRQ(TIM3_IRQn);
 	
-	sConfig.Pulse = 1000/10;
-  HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_2);
-	
-	HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2);
+	__HAL_TIM_ENABLE_IT(&TimHandle, TIM_IT_UPDATE); //The specified TIM3 interrupt : update
+  __HAL_TIM_ENABLE(&TimHandle);
 }
 
+uint32_t Tim3Ticks = 0;
 /**************************************************************/
-//					Board_RedLed
-/**************************************************************/	
-static void RedLed(uint8_t state)
-{
-	if (state)
-		HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2);
-	else
-		HAL_TIM_PWM_Stop(&TimHandle, TIM_CHANNEL_2);
-}
-
+//					TIM3_IRQHandler
 /**************************************************************/
-//					Board_GreellowLed
-/**************************************************************/
-static void GreellowLed(uint8_t state)
-{
-	if (state)
-		HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1);
-	else
-		HAL_TIM_PWM_Stop(&TimHandle, TIM_CHANNEL_1);
-}
-
-/**************************************************************/
-//					Board_Leds
-/**************************************************************/
-static void Board_Leds(Board_StateTypeDef state)
-{
-	switch(state)
+void TIM3_IRQHandler(void)
+{	
+	if(__HAL_TIM_GET_FLAG(&TimHandle, TIM_FLAG_UPDATE) != RESET)
 	{
-		case IDDLE :
-			GreellowLed(LOW);
-			RedLed(HIGH);
-			break;
-		case TRANSMITTING :
-			GreellowLed(HIGH);
-			RedLed(LOW);
-			break;
-		case SETTING :
-			GreellowLed(HIGH);
-			RedLed(LOW);
-			break;
-		case STOP :
-			GreellowLed(LOW);
-			RedLed(LOW);
-			break;
-	}		
+		if(__HAL_TIM_GET_ITSTATUS(&TimHandle, TIM_IT_UPDATE) !=RESET)
+		{
+      Tim3Ticks++;
+      if(Tim3Ticks > 10)
+      {
+        Tim3Ticks = 0;
+        GPIOB->BSRR |= (uint32_t) (GPIO_PIN_4 << 16); // set PB_4 LOW
+        HAL_NVIC_DisableIRQ(TIM3_IRQn);
+      }
+			__HAL_TIM_CLEAR_IT(&TimHandle, TIM_IT_UPDATE); // Remove TIMx update interrupt flag 
+			__HAL_TIM_CLEAR_FLAG(&TimHandle, TIM_IT_UPDATE);
+		}	
+	}
 }
 
-
+/**************************************************************/
+//					Board_LedPulse
+/**************************************************************/
+void Board_LedPulse(void)
+{
+	GPIOB->BSRR |= (uint32_t) GPIO_PIN_4; // set PB_4 HIGH
+  HAL_NVIC_EnableIRQ(TIM3_IRQn);
+}
 
 
 

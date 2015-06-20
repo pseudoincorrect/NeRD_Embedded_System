@@ -8,6 +8,8 @@ static void ChangeDataState(void);
 
 static DataStateTypeDef DataState = FIRST_STATE;
 
+extern DataStateTypeDef DataStateNRF;
+  
 static uint8_t EtaIndex;
 
 extern volatile uint16_t Fbar_Eta;
@@ -33,7 +35,10 @@ int main(void)
 		SampleSend_Acquisition();
 		DataBuffer_Process();
     if(NRF_CheckChange()) 
-      ChangeDataState();  
+    {
+      Board_LedPulse();
+      ChangeDataState();
+    }
   } 
 }
 

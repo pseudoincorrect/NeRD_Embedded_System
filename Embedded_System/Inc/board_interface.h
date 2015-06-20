@@ -14,15 +14,6 @@
 #include "stm32f0xx_hal_tim.h"
 #include "SampleSend.h"
 
-typedef enum
-{
-	IDDLE					= 0x00,
-	TRANSMITTING  = 0x01,
-	SETTING       = 0x02,
-	STOP					= 0x03,
-
-} Board_StateTypeDef;
-
 // Configure the clock for the periphérald
 void SystemClock_Config(void);
 
@@ -38,15 +29,12 @@ void Board_Init(void);
 // Initialize the GPIO
 static void GpioInit(void);
 
-// Initialize the PWM of the led
-static void PwmInit(void);
+static void TIMInit(uint32_t reloadValue, uint16_t prescalerValue);
 
-// Control the red led 
-static void RedLed(uint8_t state);
+void TIM3_IRQHandler(void);
 
 // Control the green/yellow led
-static void GreellowLed(uint8_t state);
-	
-static void Board_Leds(Board_StateTypeDef state);
+void Board_LedPulse(void);
+
 
 #endif

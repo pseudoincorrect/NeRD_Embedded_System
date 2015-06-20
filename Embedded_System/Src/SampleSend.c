@@ -15,7 +15,7 @@ void SampleSend_Init(void)
 	NRF_Init();
 	RHD_Init();
 	DataBuffer_Init(FIRST_STATE, (uint8_t) ETA_INDEX_INIT);
-	SampleSend_SetState(DataState);
+	SampleSend_SetState(FIRST_STATE);
 }
 
 /**************************************************************/

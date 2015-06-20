@@ -1,6 +1,6 @@
 #include "NRF.h"
 
-static DataStateTypeDef DataState = FIRST_STATE;
+DataStateTypeDef DataStateNRF = FIRST_STATE;
 static uint8_t EtaIndex;
 static uint8_t DataStateFLAG = 0;
 // **************************************************************
@@ -134,21 +134,22 @@ static void CsnDigitalWrite(uint8_t state)
 	else 			  GPIOB->BSRR |= (uint32_t) (GPIO_PIN_0 << 16); 
 }
 
-static uint8_t indexSpi1;
+
 // **************************************************************
 //					Spi1ReturnSend8Bit 
 // **************************************************************
 static void Spi1ReturnSend8Bit(uint8_t * dataTo, uint8_t * dataFrom, uint8_t length)
 {	
+  uint8_t indexSpi1;
 	CsnDigitalWrite(LOW);
 	
-	for (indexSpi1=0; indexSpi1<length; indexSpi1++) 
+	for (indexSpi1=0; indexSpi1 < length; indexSpi1++) 
 	{
-		*((__IO uint8_t*)(&(SPI1->DR))) = *(dataTo+indexSpi1);
-		while( !(SPI1->SR & SPI_FLAG_TXE) ); 	// wait until transmit complete
-		while( !(SPI1->SR & SPI_FLAG_RXNE) ); // wait until receive complete
-		while( SPI1->SR & SPI_FLAG_BSY ); 		// wait until SPI is not busy anymore
-	  *(dataFrom+indexSpi1) = *((__IO uint8_t*)(&(SPI1->DR))) & 0xFF;
+		*((__IO uint8_t*)(&(SPI1->DR))) = *(dataTo + indexSpi1);
+		while( !(SPI1->SR & SPI_FLAG_TXE) ){;} 	// wait until transmit complete
+		while( !(SPI1->SR & SPI_FLAG_RXNE) ){;} // wait until receive complete
+		while( SPI1->SR & SPI_FLAG_BSY ){;} 		// wait until SPI is not busy anymore
+	  *(dataFrom+indexSpi1) = *((__IO uint8_t*)(&(SPI1->DR)));
   }
 	CsnDigitalWrite(HIGH);
 }
@@ -158,6 +159,7 @@ static void Spi1ReturnSend8Bit(uint8_t * dataTo, uint8_t * dataFrom, uint8_t len
 // **************************************************************
 static void Spi1Send8Bit(uint8_t * data, uint8_t length)
 {	
+  uint8_t indexSpi1;
 	CsnDigitalWrite(LOW);
 	
 	for (indexSpi1=0; indexSpi1<length; indexSpi1++) 
@@ -175,6 +177,7 @@ static void Spi1Send8Bit(uint8_t * data, uint8_t length)
 // **************************************************************
 static void Spi1Send8BitThenDma(uint8_t * data, uint8_t length)
 {
+  uint8_t indexSpi1;
 	CsnDigitalWrite(LOW);
 	
 	for (indexSpi1=0; indexSpi1<length; indexSpi1++) 
@@ -275,6 +278,7 @@ void NRF_SendBuffer(uint8_t * bufferPointer)
 				} 				
  			}	
 				DataBuffer_Process();
+      
 		}
 		Spi1Send8Bit( clearIrqFlag, sizeof(clearIrqFlag) );
 		fifo_fill--;
@@ -299,7 +303,7 @@ static void RegisterInit(void)
 	// disable auto acknowledgement
 	uint8_t disableAutoAck[2] 	= {W_REGISTER | EN_AA 		 , 0x00};
 	// set size payload 32 byte
-	uint8_t rxPayloadSize[2] 	= {W_REGISTER | RX_PW_P0   , 32  };
+	uint8_t rxPayloadSize[2] 	= {W_REGISTER | RX_PW_P0      , 32  };
 	// set pipe enabled  0b 0000 0001 (pipe 0 enabled)
 	uint8_t rxPipe[2] 					= {W_REGISTER | EN_RXADDR  , 0x01};
 	// set size adresse RX 3 byte
@@ -339,6 +343,33 @@ static void RegisterInit(void)
 	CeDigitalWrite(HIGH);
 }
 
+/************************************************************************************************************************************/
+
+
+// **************************************************************
+//					Spi1ReturnSend 
+// **************************************************************
+static void Spi1ReturnSend(uint8_t * dataTo, uint8_t * dataFrom, uint8_t length)
+{	
+  uint8_t indexSpi1;
+	CsnDigitalWrite(LOW);
+	
+	for (indexSpi1=0; indexSpi1 < length; indexSpi1++) 
+	{
+		*((__IO uint8_t*)(&(SPI1->DR))) = *(dataTo + indexSpi1) & 0x00FF ;
+		
+    while( !(SPI1->SR & SPI_FLAG_TXE) )
+      {;} 	// wait until transmit complete
+		while( !(SPI1->SR & SPI_FLAG_RXNE) )
+      {;} // wait until receive complete
+		while( SPI1->SR & SPI_FLAG_BSY )
+      {;} 		// wait until SPI is not busy anymore
+	  
+    *(dataFrom+indexSpi1) = *((__IO uint8_t*)(&(SPI1->DR))) & 0x00FF;
+  }
+	CsnDigitalWrite(HIGH);
+}
+
 static uint8_t DataRecep, Reception, ReadStatus = R_REGISTER | STATUS;
 static uint8_t ReadPayload[33], Payload[33];
 // **************************************************************
@@ -349,19 +380,24 @@ void Check_Reception(void)
   Spi1ReturnSend8Bit(&ReadStatus, &Reception, 1);
   if(Reception & (1<<6))
   {
-    ReadPayload[0] = R_RX_PAYLOAD;
-    Spi1ReturnSend8Bit(ReadPayload, Payload,  sizeof(ReadPayload));
+    
+    ReadPayload[0] = (R_RX_PAYLOAD);
+    Spi1ReturnSend(ReadPayload, Payload,  sizeof(ReadPayload));
+    __nop();
+
     if (Payload[11] == (Payload[10] + 1)) //&& (Payload[13] == Payload[12] + 1))
     {
-       DataStateFLAG = 1;
-       DataRecep = Payload[4];
-       if ((DataRecep > 1) && (DataRecep < 5)) 
-        DataState = (DataStateTypeDef) (DataRecep & 0x07);
-       else if ((DataRecep >= 100) && (DataRecep <= 200))  
-       {
-         DataState = __8ch_16bit_20kHz__C__;
-         EtaIndex = DataRecep;
-       }
+        DataStateFLAG = 1;
+        DataRecep = Payload[4];
+        
+        if ((DataRecep > 1) && (DataRecep < 5)) 
+        DataStateNRF = (DataStateTypeDef) (DataRecep);
+        
+        else if ((DataRecep >= 100) && (DataRecep <= 200))  
+        {
+        DataStateNRF = __8ch_16bit_20kHz__C__;
+        EtaIndex = DataRecep;
+        }
     }
   }   
   Spi1Send8Bit( &flushRxFifo, 1 );
@@ -388,7 +424,7 @@ uint8_t NRF_CheckChange(void)
 // **************************************************************
 DataStateTypeDef NRF_GetDataState(void)
 {
-    return DataState;
+    return DataStateNRF;
 }
 
 // **************************************************************

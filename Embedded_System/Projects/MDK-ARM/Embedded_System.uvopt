@@ -153,19 +153,24 @@
           <WinNumber>1</WinNumber>
           <ItemText>Fbar_Eta,0x0A</ItemText>
         </Ww>
+        <Ww>
+          <count>1</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>DataStateNRF</ItemText>
+        </Ww>
       </WatchWindow1>
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>256</SubType>
-          <ItemText>&amp;Payload[10]</ItemText>
+          <ItemText>ReadPayload</ItemText>
         </Mm>
       </MemoryWindow1>
       <MemoryWindow2>
         <Mm>
           <WinNumber>2</WinNumber>
-          <SubType>0</SubType>
-          <ItemText>&amp;Reception</ItemText>
+          <SubType>256</SubType>
+          <ItemText>&amp;Payload[0]</ItemText>
         </Mm>
       </MemoryWindow2>
       <MemoryWindow3>

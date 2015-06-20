@@ -9,11 +9,17 @@ uint8_t decal = 0;
 //																	50000,  8000, 50000,  8000,  8000};
 
 
-uint16_t testValue[SIZE_VALUE] = {10000, 20000, 30000, 40000, 50000, 
-																	40000, 30000, 20000, 10000, 00000,
-																	10000, 20000, 30000, 40000, 50000,
-																	40000, 30000, 20000, 10000, 00000,
-																	10000, 10000, 10000, 10000, 00000};
+//uint16_t testValue[SIZE_VALUE] = {0000, 4500, 0000, 4500, 0000, 
+//																	4500, 0000, 4500, 0000, 4500,
+//																	0000, 4500, 0000, 4500, 0000, 
+//																	4500, 0000, 4500, 0000, 4500,
+//																	0000, 4500, 0000, 4500, 0000,};
+
+uint16_t testValue[SIZE_VALUE] = {1000, 2000, 3000, 4000, 4500, 
+																	4000, 3000, 2000, 1000, 0000,
+																	1000, 2000, 3000, 4000, 4500,
+																	4000, 3000, 2000, 1000, 0000,
+																	1000, 1000, 1000, 1000, 0000};
 
 uint16_t testBuffer[SIZE_TEST];
 
@@ -273,7 +279,7 @@ void RHD_SampleTest(uint16_t * buffer, uint8_t test)
 		case 1 :
 		{
 			for (chan = 0; chan < CHANNEL_SIZE; chan++)
-				*bufferSampleTest++ = testBuffer[testElement];
+				*bufferSampleTest++ = testBuffer[testElement] * (chan+1);
 			
 			testElement++;
 			
@@ -324,7 +330,7 @@ void RHD_SampleTest(uint16_t * buffer, uint8_t test)
 	}		
 }	
 
-static uint16_t Dat[5];
+volatile static uint16_t Dat[5];
 /**************************************************************/
 //	 				RHD_Test
 /**************************************************************/

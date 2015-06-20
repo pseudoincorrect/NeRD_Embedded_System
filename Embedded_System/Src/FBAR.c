@@ -153,31 +153,54 @@ void FBAR_Dissemble(uint16_t * bufferFrom, uint8_t * bufferTo, DataStateTypeDef 
 {
 	uint16_t i;
 	
-  if(DataState == __8ch_8bit__20kHz_NC__)
+  switch (DataState)
   {
-    #pragma unroll_completely 
-    for(i=0; i < (CHANNEL_SIZE); i++)
-    {
-      *bufferTo = (*bufferFrom >> 8)  & 0xFF;
+    
+    case(__8ch_8bit__20kHz_NC__) : 
+      #pragma unroll_completely 
+      for(i=0; i < (CHANNEL_SIZE); i++)
+      {
+        *bufferTo = (*bufferFrom >> 8)  & 0xFF;
+        
+        bufferTo++;
+        bufferFrom++;
+      }
+      break;
+    
+    case(__4ch_16bit_20kHz_NC__) :
+     #pragma unroll_completely 
+      for(i=0; i < (CHANNEL_SIZE/2); i++)
+      {
+        *bufferTo = (*bufferFrom >> 8)  & 0xFF;
+        
+        bufferTo++;
+        
+        *bufferTo = (*bufferFrom) & 0xFF;
+        
+        bufferTo++;
+        bufferFrom++;
+      } 
+      bufferFrom+= CHANNEL_SIZE/2;
+      break;
       
-      bufferTo++;
-      bufferFrom++;
-    } 
-  }
-  else
-  {
-    #pragma unroll_completely 
-    for(i=0; i < (CHANNEL_SIZE/2); i++)
-    {
-      *bufferTo = (*bufferFrom >> 8)  & 0xFF;
-      
-      bufferTo++;
-      
-      *bufferTo = (*bufferFrom) & 0xFF;
-      
-      bufferTo++;
-      bufferFrom++;
-    } 
+    case(__8ch_16bit_10kHz_NC__) :
+      #pragma unroll_completely 
+      for(i=0; i < (CHANNEL_SIZE/2); i++)
+      {
+        *bufferTo = (*bufferFrom >> 8)  & 0xFF;
+        
+        bufferTo++;
+        
+        *bufferTo = (*bufferFrom) & 0xFF;
+        
+        bufferTo++;
+        bufferFrom++;
+      } 
+      break;      
+    
+    default :
+      break;      
+ 
   }
 }
 
