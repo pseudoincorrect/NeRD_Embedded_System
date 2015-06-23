@@ -1,6 +1,8 @@
 #ifndef RHD2000_H
 #define RHD2000_H
 
+#include <CommonDefine.h>
+
 #define MASK_CONVERT 		0x0000 
 #define MASK_CALIBRATE 	0x5500
 #define MASK_CLEAR 			0x6A00
@@ -67,16 +69,27 @@ you can check the details on RHD2000 datasheet page 19 to 22 */
 #define DATA_R12  0x0019 	// 0001 0000
 #define DATA_R13  0x0000 	// 0111 1100
 
-// R14-17: Individual Amplifier Power select the input used in RHD2000
-// Amplifiers 0 to 7 			 	 7  6  5  4  3  2  1  0
-#define DATA_R14  0x00FF 	// 1  1  1  1  1  1  1  1
-// Amplifiers 8 to 15        15 14 13 12 11 10 9  8
-#define DATA_R15  0x0000 	// 0  0  0  0  0  0  0  0
-// Amplifiers 16 to 23		   23 22 21 20 19 18 17 16
-#define DATA_R16  0x0000 	// 0  0  0  0  0  0  0  0
-// Amplifiers 24 to 31       31 30 29 28 27 26 25 24
-#define DATA_R17  0x0000 	// 0  0  0  0  0  0  0  0
-
+#ifdef SWITCH_CHANNEL
+  // R14-17: Individual Amplifier Power select the input used in RHD2000
+  // Amplifiers 0 to 7 			 	 7  6  5  4  3  2  1  0
+  #define DATA_R14  0x002A 	// 0  0  1  0  1  0  1  0
+  // Amplifiers 8 to 15        15 14 13 12 11 10 9  8
+  #define DATA_R15  0x0000 	// 0  0  0  0  0  0  0  0
+  // Amplifiers 16 to 23		   23 22 21 20 19 18 17 16
+  #define DATA_R16  0x0000 	// 0  0  0  0  0  0  0  0
+  // Amplifiers 24 to 31       31 30 29 28 27 26 25 24
+  #define DATA_R17  0x0074 	// 0  1  1  1  0  1  0  0
+#else
+  // R14-17: Individual Amplifier Power select the input used in RHD2000
+  // Amplifiers 0 to 7 			 	 7  6  5  4  3  2  1  0
+  #define DATA_R14  0x0029 	// 0  0  0  1  1  1  0  1
+  // Amplifiers 8 to 15        15 14 13 12 11 10 9  8
+  #define DATA_R15  0x0000 	// 0  0  0  0  0  0  0  0
+  // Amplifiers 16 to 23		   23 22 21 20 19 18 17 16
+  #define DATA_R16  0x0000 	// 0  0  0  0  0  0  0  0
+  // Amplifiers 24 to 31       31 30 29 28 27 26 25 24
+  #define DATA_R17  0x00A8 	// 1  0  1  0  1  0  0  0
+#endif
 /************************************************************/
 
 #endif

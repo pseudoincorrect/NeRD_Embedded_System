@@ -4,6 +4,8 @@
 
 #define TESTBUFFER
 
+#define SWITCH_CHANNEL
+
 #define LOW		0
 #define HIGH	1
 
@@ -21,7 +23,6 @@
 #define CUT_VAL_SIZE 	(POW_2_NBIT - 1) // number of cut value
 //#define ETA					 	 3000					// adaptation parameter
 #define ETA_INDEX_INIT 150					// adaptation parameter
-#define SECU           250
 
 #define DEBUG_HIGH 	(GPIOA->BSRR |= GPIO_PIN_3)
 #define DEBUG_LOW		(GPIOA->BSRR |= ((uint32_t) GPIO_PIN_3 << 16))

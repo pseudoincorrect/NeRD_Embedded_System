@@ -147,7 +147,7 @@ void DataBuffer_Process(void)
         ResetCnt++;
         if(ResetCnt >= 5)
         {  
-          DataBuffer_ApplyReset();
+          //DataBuffer_ApplyReset();
           ResetCnt = 0;
         }
         else
