@@ -21,23 +21,24 @@
 //     (channel)  0x0003   ==>  (CHANNEL) 0x0300
 // CAREFUL : don't forget to set the amplifier POWER-UP regsiter in rhd2000.h
 #ifdef SWITCH_CHANNEL
-  #define CHANNEL0			0x0100
-  #define CHANNEL1			0x0300
-  #define CHANNEL2			0x0500	
-  #define CHANNEL3			0x1A00
-  #define CHANNEL4			0x1C00
-  #define CHANNEL5			0x1D00
-  #define CHANNEL6			0x1E00
-  #define CHANNEL7			0x0000
+  #define CHANNEL0	0x0500	//Omnetics_chan 5    RHD_In 5
+  #define CHANNEL1	0x1A00  //Omnetics_chan 26   RHD_In 26
+  #define CHANNEL2	0x1C00  //Omnetics_chan 28   RHD_In 28
+  #define CHANNEL3	0x1D00  //Omnetics_chan 29   RHD_In 29
+  #define CHANNEL4	0x1E00  //Omnetics_chan 30   RHD_In 30
+  #define CHANNEL5	0x0000  //Omnetics_chan NC   RHD_In 0 NC
+  #define CHANNEL6	0x0100  //Omnetics_chan 1    RHD_In 1
+  #define CHANNEL7	0x0300  //Omnetics_chan 3    RHD_In 3
+  
 #else
-  #define CHANNEL0			0x0000
-  #define CHANNEL1			0x0200
-  #define CHANNEL2			0x0300	
-  #define CHANNEL3			0x0400
-  #define CHANNEL4			0x1B00
-  #define CHANNEL5			0x1D00
-  #define CHANNEL6			0x1F00
-  #define CHANNEL7			0x1E00
+  #define CHANNEL0	0x0300	 //Omnetics_chan 10  RHD_In 3
+  #define CHANNEL1	0x0400   //Omnetics_chan 14  RHD_In 4
+  #define CHANNEL2	0x1F00   //Omnetics_chan 21  RHD_In 27
+  #define CHANNEL3	0x1D00   //Omnetics_chan 27  RHD_In 29
+  #define CHANNEL4	0x1B00   //Omnetics_chan 33  RHD_In 31
+  #define CHANNEL5	0x1E00   //Omnetics_chan NC  RHD_In 30 NC
+  #define CHANNEL6	0x0000   //Omnetics_chan 3   RHD_In 0 
+  #define CHANNEL7	0x0200   //Omnetics_chan 8   RHD_In 2
 #endif
 
 /**************************************************************/

@@ -81,6 +81,8 @@ static void GpioInit(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Pin = GPIO_PIN_3;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  
+  DEBUG_LOW;
 }
 
 static TIM_HandleTypeDef    TimHandle;

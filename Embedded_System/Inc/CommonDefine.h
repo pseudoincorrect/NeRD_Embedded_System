@@ -4,7 +4,7 @@
 
 #define TESTBUFFER
 
-#define SWITCH_CHANNEL
+//#define SWITCH_CHANNEL
 
 #define LOW		0
 #define HIGH	1

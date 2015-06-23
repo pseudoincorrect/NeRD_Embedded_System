@@ -82,7 +82,7 @@ you can check the details on RHD2000 datasheet page 19 to 22 */
 #else
   // R14-17: Individual Amplifier Power select the input used in RHD2000
   // Amplifiers 0 to 7 			 	 7  6  5  4  3  2  1  0
-  #define DATA_R14  0x0029 	// 0  0  0  1  1  1  0  1
+  #define DATA_R14  0x001D 	// 0  0  0  1  1  1  0  1
   // Amplifiers 8 to 15        15 14 13 12 11 10 9  8
   #define DATA_R15  0x0000 	// 0  0  0  0  0  0  0  0
   // Amplifiers 16 to 23		   23 22 21 20 19 18 17 16
