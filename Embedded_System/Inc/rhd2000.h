@@ -66,8 +66,12 @@ you can check the details on RHD2000 datasheet page 19 to 22 */
 #define DATA_R11  0x0000 	// 0000 1101
 
 // R12-13: On-Chip Amplifier Bandwith Select lower frequency
-#define DATA_R12  0x0019 	// 0001 0000
-#define DATA_R13  0x0000 	// 0111 1100
+//100Hz
+//#define DATA_R12  0x0019 	// 0001 0000
+//#define DATA_R13  0x0000 	// 0111 1100
+//0.1Hz		
+#define DATA_R12 0x0010
+#define DATA_R13 0x003C
 
 #ifdef SWITCH_CHANNEL
   // R14-17: Individual Amplifier Power select the input used in RHD2000
