@@ -56,12 +56,12 @@ static void ChangeDataState(void)
     SampleSend_SetState(DataState);
   }
   
-  if ((DataState == __8ch_16bit_20kHz__C__ ) && (EtaIndex != NRF_GetEtaIndex()))
+  if ((DataState == __8ch_3bit__20kHz__C__ ) && (EtaIndex != NRF_GetEtaIndex()))
   {
     EtaIndex = NRF_GetEtaIndex();
-    DataBuffer_ChangeState(__8ch_16bit_20kHz__C__, (uint8_t) EtaIndex);
-    //DataBuffer_ChangeState(__8ch_16bit_20kHz__C__, (uint8_t) 0);
-    SampleSend_SetState(__8ch_16bit_20kHz__C__);
+    DataBuffer_ChangeState(__8ch_3bit__20kHz__C__, (uint8_t) EtaIndex);
+    //DataBuffer_ChangeState(__8ch_3bit__20kHz__C__, (uint8_t) 0);
+    SampleSend_SetState(__8ch_3bit__20kHz__C__);
   }   
   SampleSend_Enable(HIGH);
 }

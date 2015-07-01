@@ -51,7 +51,7 @@ uint8_t * DataBufferRead8(void);
 static uint8_t *  DataBufferWrite8(void);
 
 // create the first frame of the compressed packet 
-static void  DataBuffer_ApplyReset(void);
+//static void  DataBuffer_ApplyReset(void);
 
 // compress a block of datas if available
 void DataBuffer_Process(void);

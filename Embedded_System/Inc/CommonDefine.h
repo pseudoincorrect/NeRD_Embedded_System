@@ -21,7 +21,6 @@
 #define NBIT 				 	 3								 // resolution of the compression
 #define POW_2_NBIT  	(1 << NBIT) 			// 2^NBIT
 #define CUT_VAL_SIZE 	(POW_2_NBIT - 1) // number of cut value
-//#define ETA					 	 3000					// adaptation parameter
 #define ETA_INDEX_INIT 150					// adaptation parameter
 
 #define DEBUG_HIGH 	(GPIOA->BSRR |= GPIO_PIN_3)
@@ -36,13 +35,13 @@
 /**************************************************************/
 typedef enum
 {
-	__8ch_16bit_20kHz__C__ = 0x01,
+	__8ch_3bit__20kHz__C__ = 0x01,
 	__4ch_16bit_20kHz_NC__ = 0x02,
 	__8ch_16bit_10kHz_NC__ = 0x03,
   __8ch_8bit__20kHz_NC__ = 0x04,
   
 } DataStateTypeDef;
 
-#define FIRST_STATE	__8ch_16bit_20kHz__C__
+#define FIRST_STATE	__8ch_3bit__20kHz__C__
 
 #endif
