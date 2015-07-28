@@ -15,8 +15,8 @@
 #define NUMBER_OF_PACKETS	 30 // number of packet send at once (size of the buffer)
 #define SAMPLE_BUFFER_SIZE 	(BYTES_PER_FRAME * NUMBER_OF_PACKETS) // defined in NRF.h
 
-#define SIZE_BUFFER_RHD		 70	
-#define SIZE_BUFFER_NRF		 3
+#define SIZE_BUFFER_RHD		 20//70	
+#define SIZE_BUFFER_NRF		 1//3
 
 #define NBIT 				 	 3								 // resolution of the compression
 #define POW_2_NBIT  	(1 << NBIT) 			// 2^NBIT

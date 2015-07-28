@@ -4,16 +4,28 @@
 #include "board_interface.h"
 #include "CommonDefine.h"
 
+// *************************************************************************
+// *************************************************************************
+// 						Private functions	
+// *************************************************************************
+// *************************************************************************
 static void ChangeDataState(void);
-
+static void InitBufferTest(void);
+// *************************************************************************
+// *************************************************************************
+// 						static variables	
+// *************************************************************************
+// *************************************************************************
 static DataStateTypeDef DataState = FIRST_STATE;
-
 extern DataStateTypeDef DataStateNRF;
-  
 static uint8_t EtaIndex;
-
 extern volatile uint16_t Fbar_Eta;
 
+static uint8_t BufferTest[NUMBER_OF_PACKETS][BYTES_PER_FRAME];
+
+// **************************************************************
+// 	 				MAIN 
+// **************************************************************
 int main(void)
 {
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -25,23 +37,20 @@ int main(void)
   /* Initialize all configured peripherals */
   Board_Init();
  
-	/* Initialize the NRF moduke */
-	SampleSend_Init();
-	
-	SampleSend_Enable(HIGH);
+	/* Initialize the NRF moduke */	
+  NRF_Init();
+  
+  InitBufferTest();
   
 	while (1)
   {
-		SampleSend_Acquisition();
-		DataBuffer_Process();
-    if(NRF_CheckChange()) 
-    {
-      Board_LedPulse();
-      ChangeDataState();
-    }
+    NRF_SendBuffer((uint8_t *) BufferTest);
   } 
 }
 
+// **************************************************************
+// 	 				ChangeDataState 
+// **************************************************************
 static void ChangeDataState(void)
 {
   SampleSend_Enable(LOW);
@@ -66,8 +75,38 @@ static void ChangeDataState(void)
   SampleSend_Enable(HIGH);
 }
 
-
-
+// **************************************************************
+// 	 				InitBufferTest 
+// **************************************************************
+static void InitBufferTest(void)
+{
+  uint8_t i,j;
+  
+  for(i=0; i < NUMBER_OF_PACKETS; i++)
+  {
+    for(j=0; j < BYTES_PER_FRAME; j++)
+    { 
+      if(i & 0x01) 
+      {
+        if (j == 0)
+          BufferTest[i][j] = 0x0E;
+        if (j == 1)
+          BufferTest[i][j] = 0x0F;
+        else
+          BufferTest[i][j] = j + 100;
+      }
+      else
+      {
+        if (j == 0)
+          BufferTest[i][j] = 0xE0;
+        if (j == 1)
+          BufferTest[i][j] = 0xF0;
+        else
+          BufferTest[i][j] = j + 100;
+      }
+    }
+  }
+}
 
 
 
