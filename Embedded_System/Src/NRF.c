@@ -16,11 +16,11 @@ static uint8_t RfParameter[2] 		= {W_REGISTER | RF_SETUP  , 0x0E};    // set RF 
 static uint8_t ClearIrqFlag[2]    = {W_REGISTER | STATUS    , 0x70}; // clear IRQ                         0b 1110 0000
 
 //config without CRC
-//static uint8_t ReceiveMode[2] 		= {W_REGISTER | CONFIG		, 0x33};   // set Receive mode                0b 0011 0011 
-//static uint8_t TransmitMode[2]    = {W_REGISTER | CONFIG    , 0x52};  // set Transmit mode                0b 0101 0010
+static uint8_t ReceiveMode[2] 		= {W_REGISTER | CONFIG		, 0x33};   // set Receive mode                0b 0011 0011 
+static uint8_t TransmitMode[2]    = {W_REGISTER | CONFIG    , 0x52};  // set Transmit mode                0b 0101 0010
 //config with CRC
-static uint8_t ReceiveModeCRC[2] 	= {W_REGISTER | CONFIG		, 0x3B};   // set Receive mode                0b 0011 0011 
-static uint8_t TransmitModeCRC[2] = {W_REGISTER | CONFIG    , 0x5A};  // set Transmit mode                0b 0101 0010
+//static uint8_t ReceiveMode[2] 	= {W_REGISTER | CONFIG		, 0x3B};   // set Receive mode                0b 0011 0011 
+//static uint8_t TransmitMode[2] = {W_REGISTER | CONFIG    , 0x5A};  // set Transmit mode                0b 0101 0010
 
 static uint8_t FlushRxFifo 				= FLUSH_RX;                       // flush Rx fifo
 static uint8_t FlushTxFifo				= FLUSH_TX;                      // flush Tx fifo
@@ -280,7 +280,7 @@ void NRF_SendBuffer(uint8_t * bufferPointer)
   Check_Reception(); 
 	CeDigitalWrite(LOW);
 	
-	Spi1Send8Bit( TransmitModeCRC, sizeof(TransmitModeCRC) );
+	Spi1Send8Bit( TransmitMode, sizeof(TransmitMode) );
 	Spi1Send8Bit( &FlushTxFifo, 1 );
 	Spi1Send8Bit( ClearIrqFlag, sizeof(ClearIrqFlag) );
 	
@@ -316,7 +316,7 @@ void NRF_SendBuffer(uint8_t * bufferPointer)
 	} 	
 	CeDigitalWrite(LOW);
 	
-  Spi1Send8Bit( ReceiveModeCRC, sizeof(ReceiveModeCRC) );
+  Spi1Send8Bit( ReceiveMode, sizeof(ReceiveMode) );
   Spi1Send8Bit( &FlushRxFifo, 1 );
   Spi1Send8Bit( ClearIrqFlag, sizeof(ClearIrqFlag) );
   
@@ -343,7 +343,7 @@ static void RegisterInit(void)
   Spi1Send8Bit(	ClearIrqFlag, 	sizeof(ClearIrqFlag)  );
 	Spi1Send8Bit(	&FlushRxFifo, 	1											);
 	Spi1Send8Bit(	&FlushTxFifo, 	1											);
-	Spi1Send8Bit(	ReceiveModeCRC, 	  sizeof(ReceiveModeCRC)	  );
+	Spi1Send8Bit(	ReceiveMode, 	  sizeof(ReceiveMode)	  );
 	CeDigitalWrite(HIGH);
 }
 
@@ -455,7 +455,7 @@ void NRF_Test(void)
 	CeDigitalWrite(LOW);
 	//Spi1Send8Bit(readP0Addr, 	 sizeof(readP0Addr));
 	Spi1Send8Bit(ClearIrqFlag, sizeof(ClearIrqFlag));
-	Spi1Send8Bit(TransmitModeCRC, sizeof(TransmitModeCRC));
+	Spi1Send8Bit(TransmitMode, sizeof(TransmitMode));
 	
 	Spi1DmaSend(spi1TxBuffer); 
 

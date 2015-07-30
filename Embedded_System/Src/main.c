@@ -11,6 +11,7 @@
 // *************************************************************************
 static void ChangeDataState(void);
 static void InitBufferTest(void);
+
 // *************************************************************************
 // *************************************************************************
 // 						static variables	
@@ -20,7 +21,6 @@ static DataStateTypeDef DataState = FIRST_STATE;
 extern DataStateTypeDef DataStateNRF;
 static uint8_t EtaIndex;
 extern volatile uint16_t Fbar_Eta;
-
 static uint8_t BufferTest[NUMBER_OF_PACKETS][BYTES_PER_FRAME];
 
 // **************************************************************
@@ -90,8 +90,10 @@ static void InitBufferTest(void)
       {
         if (j == 0)
           BufferTest[i][j] = 0x0E;
-        if (j == 1)
+        else if (j == 1)
           BufferTest[i][j] = 0x0F;
+        else if (j == 2)
+          BufferTest[i][j] = i;
         else
           BufferTest[i][j] = j + 100;
       }
@@ -99,8 +101,10 @@ static void InitBufferTest(void)
       {
         if (j == 0)
           BufferTest[i][j] = 0xE0;
-        if (j == 1)
+        else if (j == 1)
           BufferTest[i][j] = 0xF0;
+        else if (j == 2)
+          BufferTest[i][j] = i;
         else
           BufferTest[i][j] = j + 100;
       }

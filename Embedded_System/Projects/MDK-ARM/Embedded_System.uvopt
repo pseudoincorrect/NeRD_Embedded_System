@@ -151,19 +151,14 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Fbar_Eta,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>1</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>DataStateNRF</ItemText>
+          <ItemText>BufferTest[30][32]</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>256</SubType>
-          <ItemText>ReadPayload</ItemText>
+          <ItemText>BufferTest</ItemText>
         </Mm>
       </MemoryWindow1>
       <MemoryWindow2>
