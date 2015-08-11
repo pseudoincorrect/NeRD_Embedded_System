@@ -161,7 +161,7 @@
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Fbar_Eta</ItemText>
+          <ItemText>Fbar_Eta,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
@@ -174,8 +174,8 @@
       <MemoryWindow2>
         <Mm>
           <WinNumber>2</WinNumber>
-          <SubType>266</SubType>
-          <ItemText>&amp;winner</ItemText>
+          <SubType>10</SubType>
+          <ItemText>cutValue</ItemText>
         </Mm>
       </MemoryWindow2>
       <MemoryWindow3>
