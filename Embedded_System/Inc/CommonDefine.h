@@ -2,7 +2,7 @@
 #ifndef __COMMONDEFINE_H__
 #define __COMMONDEFINE_H__
 
-#define TESTBUFFER
+//#define TESTBUFFER
 
 //#define SWITCH_CHANNEL
 
@@ -27,7 +27,7 @@
 #define DEBUG_LOW		(GPIOA->BSRR |= ((uint32_t) GPIO_PIN_3 << 16))
 
 #define	SIZE_VALUE	 	 25
-#define INTERVAL_TEST  25
+#define INTERVAL_TEST  10
 #define SIZE_TEST			(SIZE_VALUE * INTERVAL_TEST)
 
 /**************************************************************/

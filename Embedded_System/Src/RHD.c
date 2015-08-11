@@ -17,9 +17,9 @@ uint8_t decal = 0;
 
 uint16_t testValue[SIZE_VALUE] = {1000, 2000, 3000, 4000, 4500, 
 																	4000, 3000, 2000, 1000, 0000,
-																	1000, 2000, 3000, 4000, 4500,
-																	4000, 3000, 2000, 1000, 0000,
-																	1000, 1000, 1000, 1000, 0000};
+																	4000, 0000, 0000, 2000, 4500,
+																	2000, 0000, 0000, 1000, 3000,
+																	1000, 3000, 1000, 3000, 0000};
 
 uint16_t testBuffer[SIZE_TEST];
 
@@ -116,6 +116,7 @@ static void Spi2Init(void)
 
 static uint8_t  channelIndex = 0;
 static uint16_t * bufferSample;
+//static uint8_t tog = 0;
 /**************************************************************/
 //					SPI2_IRQHandler
 /**************************************************************/
@@ -141,6 +142,12 @@ void SPI2_IRQHandler()
 		{
 			channelIndex = 0;
 			__HAL_SPI_DISABLE_IT(&SpiHandle, SPI_IT_RXNE | SPI_IT_TXE);
+//      if (tog)
+//      { 
+//        __HAL_SPI_ENABLE_IT(&SpiHandle, SPI_IT_RXNE | SPI_IT_TXE);
+//        tog = 0;
+//      }
+
 		}	
 	}
 	SPI2->SR &=  ~(SPI_IT_RXNE | SPI_IT_TXE); // clear flag to don't trigger directly an other interrupt
@@ -239,6 +246,8 @@ void RHD_Sample(uint16_t * buffer)
 {
 	bufferSample = buffer;
 	
+  //tog = 1;
+  
 	// enable interrupt : the sampling is done in the interrupt handler
 	__HAL_SPI_ENABLE_IT(&SpiHandle, SPI_IT_RXNE | SPI_IT_TXE);
 }
@@ -279,7 +288,7 @@ void RHD_SampleTest(uint16_t * buffer, uint8_t test)
 		case 1 :
 		{
 			for (chan = 0; chan < CHANNEL_SIZE; chan++)
-				*bufferSampleTest++ = testBuffer[testElement] * (chan+1);
+				*bufferSampleTest++ = testBuffer[testElement] * (chan+1) + 10000;
 			
 			testElement++;
 			

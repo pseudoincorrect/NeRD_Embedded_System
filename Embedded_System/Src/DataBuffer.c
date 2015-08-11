@@ -118,12 +118,12 @@ static uint8_t *  DataBufferWrite8(void)
 /**************************************************************/
 //					 DataBuffer_ApplyReset
 /**************************************************************/
-//void  DataBuffer_ApplyReset(void)
-//{	
-//	ElectrophyData.Write8_element += BYTES_PER_FRAME;
-//	
-//	FBAR_Reset(DataBufferRead16(), &ElectrophyData.Data8[ElectrophyData.Write8_index][0]);	; 
-//}
+void  DataBuffer_ApplyReset(void)
+{	
+	ElectrophyData.Write8_element += BYTES_PER_FRAME;
+	
+	FBAR_Reset(DataBufferRead16(), &ElectrophyData.Data8[ElectrophyData.Write8_index][0]);	; 
+}
 
 static uint8_t ResetCnt;
 /**************************************************************/
@@ -147,7 +147,7 @@ void DataBuffer_Process(void)
         ResetCnt++;
         if(ResetCnt >= 5)
         {  
-          //DataBuffer_ApplyReset();
+          DataBuffer_ApplyReset();
           ResetCnt = 0;
         }
         else
