@@ -55,13 +55,11 @@ void TIM2_IRQHandler(void)
 			__HAL_TIM_CLEAR_IT(&TimHandle, TIM_IT_UPDATE); // Remove TIMx update interrupt flag 
 			__HAL_TIM_CLEAR_FLAG(&TimHandle, TIM_IT_UPDATE);
 		}	
-    DEBUG_HIGH;
 #ifdef TESTBUFFER
 		RHD_SampleTest(DataBuffer_Write16(), 1);
 #else
 		RHD_Sample(DataBuffer_Write16());
 #endif
-    DEBUG_LOW;
 	}
 }	
 
