@@ -142,9 +142,7 @@ void DataBuffer_Process(void)
     {
       if(ElectrophyData.Write8_element)
       {
-        DEBUG_LOW; DEBUG_HIGH; DEBUG_LOW; DEBUG_HIGH;
-        FBAR_Compress(DataBufferRead16(),  DataBufferWrite8() );
-        DEBUG_LOW; DEBUG_HIGH; DEBUG_LOW; DEBUG_HIGH;			
+        FBAR_Compress(DataBufferRead16(),  DataBufferWrite8() );		
       }
       else
       {  
@@ -156,9 +154,7 @@ void DataBuffer_Process(void)
         }
         else
         {
-          DEBUG_LOW; DEBUG_HIGH; DEBUG_LOW; DEBUG_HIGH;
-          FBAR_Compress(DataBufferRead16(),  DataBufferWrite8() );
-          DEBUG_LOW; DEBUG_HIGH; DEBUG_LOW; DEBUG_HIGH;          
+          FBAR_Compress(DataBufferRead16(),  DataBufferWrite8() );          
         }
       }
     }

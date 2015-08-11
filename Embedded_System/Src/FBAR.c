@@ -115,6 +115,8 @@ void FBAR_Reset(uint16_t * bufferFrom, uint8_t * bufferTo)
 // CHANNEL_SIZE values compress them on NBIT bits 
 // and send it to a buffer (the NRF buffer) for a next sending
 /**************************************************************************/
+//************************************************************************* N == 1 
+#if (NBIT == 1)
 void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 {
 	volatile uint16_t i,j,winner,ValueCurrentChannel, tempValue;
@@ -122,10 +124,7 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
   #pragma unroll_completely
 	for(i=0; i < CHANNEL_SIZE; i++)
 	{		
-		ValueCurrentChannel = *bufferFrom++;
-		
-    //************************************************** N == 1
-    #if (NBIT == 1)
+		ValueCurrentChannel = *bufferFrom++;  
     winner = 0;
     //Winner choosing regarding the current value and the only cut value
     if (ValueCurrentChannel >= cutValue[i][0])
@@ -139,12 +138,73 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
       if (cutValue[i][0] > Fbar_Eta)
         cutValue[i][0] -= Fbar_Eta;  
     }
-
     //send winner to the circular buffer
-    *bufferTo++ = winner; 
-   
-    //************************************************** N == 4
-    #elif (NBIT == 4)
+    *bufferTo++ = winner; 	
+	}
+}
+#endif
+
+//************************************************************************* N == 2
+#if ((NBIT == 2) | (NBIT == 3)) 
+void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
+{
+	uint16_t i,j,winner,ValueCurrentChannel;
+
+	#pragma unroll_completely
+	for(i=0; i < CHANNEL_SIZE; i++)
+	{		
+		ValueCurrentChannel = *bufferFrom++;
+		winner = 0;
+		
+		#pragma unroll_completely 
+		for (j=0; j < CUT_VAL_SIZE; j++)
+		{
+			if (ValueCurrentChannel >= cutValue[i][j])
+			{
+				if(j == (CUT_VAL_SIZE-1))
+				{
+					// on controle que les cutvalues ne dépassent pas l2^16
+          if (cutValue[i][CUT_VAL_SIZE-1] < 65535 - Fbar_Eta) 
+						cutValue[i][CUT_VAL_SIZE-1] += Fbar_Eta;
+				}
+				// anti chevauchement (et compilation warning j+1, depassement range tableau, secu à prévoir)
+				else 
+          if((cutValue[i][j+1] - cutValue[i][j]) >= Fbar_EtaAdd[j]) 
+				{
+					cutValue[i][j] += Fbar_EtaAdd[j];	
+				}
+				winner = j+1; 
+			}
+			else	
+			{
+				if (!j)
+				{
+					// on controle que les cutvalues ne dépassent pas 0 en négatif
+           if (cutValue[i][0] > Fbar_Eta)  
+						cutValue[i][0] -= Fbar_Eta;        
+				}
+				// anti chevauchement (et compilation warning j-1, depassement negatif range tableau, secu à prévoir)
+				else if (((cutValue[i][j] - cutValue[i][j-1]) >= Fbar_EtaSous[j]))  
+				{
+					cutValue[i][j] -=  Fbar_EtaSous[j];	
+				}
+			}
+		}	
+		*bufferTo++ = winner; 
+	}
+}
+#endif
+
+//************************************************************************* N == 4
+#if (NBIT == 4)
+void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
+{
+	volatile uint16_t i,j,winner,ValueCurrentChannel, tempValue;
+
+  #pragma unroll_completely
+	for(i=0; i < CHANNEL_SIZE; i++)
+	{		
+		ValueCurrentChannel = *bufferFrom++;    
   
     if (ValueCurrentChannel >= cutValue[i][0])
     {
@@ -184,47 +244,10 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
     }
       
     //send winner to the circular buffer
-    *bufferTo++ = winner; 
-    
-    //************************************************** N == 2 or 3
-    #else
-    winner = 0;
-    #pragma unroll_completely 
-		for (j=0; j < CUT_VAL_SIZE; j++)
-		{
-			if (ValueCurrentChannel >= cutValue[i][j])
-			{
-				if(j == (CUT_VAL_SIZE-1))
-				{
-					// on controle que les cutvalues ne dépassent pas 2^16
-          if (cutValue[i][CUT_VAL_SIZE-1] < 65535 - Fbar_Eta) 
-						cutValue[i][CUT_VAL_SIZE-1] += Fbar_Eta;
-				}
-				// anti chevauchement (et compilation warning j+1, depassement range tableau, secu à prévoir)
-				else 
-          if((cutValue[i][j+1] - cutValue[i][j]) >= Fbar_EtaAdd[j]) 
-            cutValue[i][j] += Fbar_EtaAdd[j];	
-        winner = j+1; 
-			}
-			else	
-			{
-				if (!j)
-				{
-					// on controle que les cutvalues ne dépassent pas 0 en négatif
-           if (cutValue[i][0] > Fbar_Eta)  
-						cutValue[i][0] -= Fbar_Eta;        
-				}
-				// anti chevauchement (et compilation warning j-1, depassement negatif range tableau, secu à prévoir)
-				else if (((cutValue[i][j] - cutValue[i][j-1]) >= Fbar_EtaSous[j]))  
-				{
-					cutValue[i][j] -=  Fbar_EtaSous[j];	
-				}
-			}
-		} 
-    *bufferTo++ = winner; 
-    #endif	
+    *bufferTo++ = winner; 	
 	}
 }
+#endif
 
 /**************************************************************************/
 //					FBAR_Dissemble
