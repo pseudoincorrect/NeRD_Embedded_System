@@ -101,7 +101,7 @@ void SampleSend_SetState(DataStateTypeDef State)
   if(DataState == __8ch_16bit_10kHz_NC__)
      TIM2Init (250,20); 
    else
-     TIM2Init (250,40); //(260,10); // (268,8) =  20 kHz sample
+     TIM2Init (250,25); //(260,10); // (268,8) =  20 kHz sample
 }
 
 

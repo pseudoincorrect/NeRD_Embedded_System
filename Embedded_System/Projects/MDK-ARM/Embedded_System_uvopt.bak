@@ -167,15 +167,15 @@
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
-          <SubType>256</SubType>
-          <ItemText>ReadPayload</ItemText>
+          <SubType>266</SubType>
+          <ItemText>&amp;(Fbar_EtaAdd[0])</ItemText>
         </Mm>
       </MemoryWindow1>
       <MemoryWindow2>
         <Mm>
           <WinNumber>2</WinNumber>
-          <SubType>256</SubType>
-          <ItemText>&amp;Payload[0]</ItemText>
+          <SubType>266</SubType>
+          <ItemText>&amp;winner</ItemText>
         </Mm>
       </MemoryWindow2>
       <MemoryWindow3>
