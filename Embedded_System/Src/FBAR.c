@@ -103,7 +103,7 @@ void FBAR_Reset(uint16_t * bufferFrom, uint8_t * bufferTo)
     for(j=0; j < CUT_VAL_SIZE; j++)
 		  cutValue[i][j] = valueFrom + (j-NBIT) * delta;
     // quand je prend un delta non constant, le système à la réception ne fonctionne pas très bien
-		delta = (cutValue[i][CUT_VAL_SIZE - 1]-cutValue[i][0]) / (CUT_VAL_SIZE - 1);
+		delta = 2000 / (CUT_VAL_SIZE - 1);  //(cutValue[i][CUT_VAL_SIZE - 1]-cutValue[i][0]) / (CUT_VAL_SIZE - 1);
     #endif 
 	}
 }

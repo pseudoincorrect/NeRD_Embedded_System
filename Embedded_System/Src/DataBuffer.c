@@ -135,13 +135,17 @@ void DataBuffer_Process(void)
 	{     
     uint16_t * DataBufferRead16ptr;
     uint8_t  * DataBufferWrite8ptr;
-  
+    
     DEBUG_HIGH;
     
     if(DataState == __8ch_3bit__20kHz__C__)  // if Compression
     {
       if(ElectrophyData.Write8_element)
-        FBAR_Compress(DataBufferRead16(),  DataBufferWrite8() );			
+      {
+        DEBUG_LOW; DEBUG_HIGH; DEBUG_LOW; DEBUG_HIGH;
+        FBAR_Compress(DataBufferRead16(),  DataBufferWrite8() );
+        DEBUG_LOW; DEBUG_HIGH; DEBUG_LOW; DEBUG_HIGH;			
+      }
       else
       {  
         ResetCnt++;
@@ -151,7 +155,11 @@ void DataBuffer_Process(void)
           ResetCnt = 0;
         }
         else
+        {
+          DEBUG_LOW; DEBUG_HIGH; DEBUG_LOW; DEBUG_HIGH;
           FBAR_Compress(DataBufferRead16(),  DataBufferWrite8() );
+          DEBUG_LOW; DEBUG_HIGH; DEBUG_LOW; DEBUG_HIGH;          
+        }
       }
     }
     else // if NOT Compression
