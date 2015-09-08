@@ -1,13 +1,14 @@
 #include "FBAR.h"
 
-#if (NBIT == 4)
+#if (!FBAR)
 volatile uint16_t cutValue[CHANNEL_SIZE][1] = {0}; 
 #else
 volatile uint16_t cutValue[CHANNEL_SIZE][CUT_VAL_SIZE + 1] = {0}; // (CUT_VAL_SIZE + 1) : we add 1 to avoid the warning out of range line 115
 #endif
 
-#if (NBIT == 4)
+#if (!FBAR)
 volatile uint16_t Fbar_EtaAdd[4]={0};
+volatile uint16_t Fbar_EtaSous[4]={0};
 #else
 volatile uint16_t Fbar_EtaAdd[CUT_VAL_SIZE]={0};
 volatile uint16_t Fbar_EtaSous[CUT_VAL_SIZE]={0};
@@ -52,23 +53,26 @@ void FBAR_Init(uint8_t Fbar_EtaIndex)
 	for(i=0; i < CHANNEL_SIZE; i++)
 		for(j=0; j < CUT_VAL_SIZE; j++)
 		{
-      #if ((NBIT == 1) || (NBIT == 4))
+      #if ((NBIT == 1) || !FBAR)
       cutValue[i][0] = 30000;
       #else
       cutValue[i][j] = (j+1) * delta;
       #endif
     }
     
-  #if ((NBIT == 2) || (NBIT == 3)) 	
+  #if (FBAR && NBIT > 1) 	
 	//initialize the adaptation parameters
+    
+  delta = 2000 / (CUT_VAL_SIZE - 1);  //(cutValue[i][CUT_VAL_SIZE - 1]-cutValue[i][0]) / (CUT_VAL_SIZE - 1); 
+    
 	for (i=0; i < CUT_VAL_SIZE; i++)
 	{
 		Fbar_EtaSous[i] = Fbar_Eta / (i + 1);
 		Fbar_EtaAdd[i]  = Fbar_Eta / (CUT_VAL_SIZE - i);
 	}
-  #elif (NBIT == 4)
+  #else
   for (i=0; i <4; i++)
-		Fbar_EtaAdd[i] = (Fbar_Eta / 3) * i;   
+		Fbar_EtaAdd[i] = (Fbar_Eta / 3) * i ;   
   #endif
 }
 
@@ -83,7 +87,7 @@ void FBAR_Init(uint8_t Fbar_EtaIndex)
 /**************************************************************************/
 void FBAR_Reset(uint16_t * bufferFrom, uint8_t * bufferTo)
 {
-	static uint16_t i,j, valueFrom;
+	static volatile uint16_t i,j, valueFrom;
 	
 	*bufferTo++ = 0xFF;
 	*bufferTo++ = 0xFF;
@@ -95,15 +99,13 @@ void FBAR_Reset(uint16_t * bufferFrom, uint8_t * bufferTo)
 		*bufferTo++ = (valueFrom >> 8);
 		*bufferTo++ = (valueFrom & 0xFF);
   
-    #if ((NBIT == 1) || (NBIT == 4))
+    #if ((NBIT == 1) || !FBAR)
     cutValue[i][0] = valueFrom;
     
 		#else
     #pragma unroll_completely
     for(j=0; j < CUT_VAL_SIZE; j++)
-		  cutValue[i][j] = valueFrom + (j-NBIT) * delta;
-    // quand je prend un delta non constant, le système à la réception ne fonctionne pas très bien
-		delta = 2000 / (CUT_VAL_SIZE - 1);  //(cutValue[i][CUT_VAL_SIZE - 1]-cutValue[i][0]) / (CUT_VAL_SIZE - 1);
+		  cutValue[i][j] = valueFrom + (j-NBIT) * delta;  // quand je prend un delta non constant, le système à la réception ne fonctionne pas très bien
     #endif 
 	}
 }
@@ -116,7 +118,7 @@ void FBAR_Reset(uint16_t * bufferFrom, uint8_t * bufferTo)
 // and send it to a buffer (the NRF buffer) for a next sending
 /**************************************************************************/
 //************************************************************************* N == 1 
-#if (NBIT == 1)
+#if (FBAR && NBIT == 1)
 void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 {
 	volatile uint16_t i,j,winner,ValueCurrentChannel, tempValue;
@@ -145,7 +147,7 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 #endif
 
 //************************************************************************* N == 2
-#if ((NBIT == 2) | (NBIT == 3)) 
+#if (FBAR && NBIT > 1) 
 void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 {
 	uint16_t i,j,winner,ValueCurrentChannel;
@@ -169,10 +171,10 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 				}
 				// anti chevauchement (et compilation warning j+1, depassement range tableau, secu à prévoir)
 				else 
-          if((cutValue[i][j+1] - cutValue[i][j]) >= Fbar_EtaAdd[j]) 
-				{
-					cutValue[i][j] += Fbar_EtaAdd[j];	
-				}
+        {  
+          if ((cutValue[i][j+1] - cutValue[i][j]) >= Fbar_EtaAdd[j]) 
+            cutValue[i][j] += Fbar_EtaAdd[j];	
+        }
 				winner = j+1; 
 			}
 			else	
@@ -180,14 +182,12 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 				if (!j)
 				{
 					// on controle que les cutvalues ne dépassent pas 0 en négatif
-           if (cutValue[i][0] > Fbar_Eta)  
+          if (cutValue[i][0] > Fbar_Eta)  
 						cutValue[i][0] -= Fbar_Eta;        
 				}
 				// anti chevauchement (et compilation warning j-1, depassement negatif range tableau, secu à prévoir)
 				else if (((cutValue[i][j] - cutValue[i][j-1]) >= Fbar_EtaSous[j]))  
-				{
 					cutValue[i][j] -=  Fbar_EtaSous[j];	
-				}
 			}
 		}	
 		*bufferTo++ = winner; 
@@ -196,7 +196,7 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 #endif
 
 //************************************************************************* N == 4
-#if (NBIT == 4)
+#if (!FBAR)
 void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 {
 	volatile uint16_t i,j,winner,ValueCurrentChannel, tempValue;
@@ -261,7 +261,6 @@ void FBAR_Dissemble(uint16_t * bufferFrom, uint8_t * bufferTo, DataStateTypeDef 
 	
   switch (DataState)
   {
-    
     case(__8ch_8bit__20kHz_NC__) : 
       #pragma unroll_completely 
       for(i=0; i < (CHANNEL_SIZE); i++)
