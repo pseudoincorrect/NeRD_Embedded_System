@@ -125,7 +125,7 @@ void  DataBuffer_ApplyReset(void)
 	FBAR_Reset(DataBufferRead16(), &ElectrophyData.Data8[ElectrophyData.Write8_index][0]);	; 
 }
 
-static uint8_t ResetCnt;
+static uint16_t ResetCnt;
 /**************************************************************/
 //					DataBuffer_Process
 /**************************************************************/
@@ -147,8 +147,9 @@ void DataBuffer_Process(void)
       else
       {  
         ResetCnt++;
-        if(ResetCnt >= 5)
+        if(ResetCnt > 500)
         {  
+          //FBAR_Compress(DataBufferRead16(), DataBufferWrite8());
           DataBuffer_ApplyReset();
           ResetCnt = 0;
         }
@@ -186,6 +187,7 @@ void DataBuffer_ChangeState(DataStateTypeDef State, uint8_t Eta)
 {
   DataState = State; 
   DataBuffer_Init(State, Eta);
+  //ResetCnt = 5;
 }
 
 

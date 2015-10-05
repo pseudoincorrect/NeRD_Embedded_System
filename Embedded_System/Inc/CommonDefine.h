@@ -2,7 +2,7 @@
 #ifndef __COMMONDEFINE_H__
 #define __COMMONDEFINE_H__
 
-//#define TESTBUFFER
+#define TESTBUFFER
 
 //#define SWITCH_CHANNEL
 
@@ -18,18 +18,17 @@
 #define SIZE_BUFFER_RHD		 70	
 #define SIZE_BUFFER_NRF		 3
 
-#define FBAR           1
 #define NBIT 				 	 2								 // resolution of the compression
 
 #define POW_2_NBIT  	(1 << NBIT) 			// 2^NBIT
 #define CUT_VAL_SIZE 	(POW_2_NBIT - 1) // number of cut value
-#define ETA_INDEX_INIT 150					// adaptation parameter
+#define ETA_INDEX_INIT 150					  // adaptation parameter
 
 #define DEBUG_HIGH 	(GPIOA->BSRR |= GPIO_PIN_3)
 #define DEBUG_LOW		(GPIOA->BSRR |= ((uint32_t) GPIO_PIN_3 << 16))
 
 #define	SIZE_VALUE	 	 25
-#define INTERVAL_TEST  10
+#define INTERVAL_TEST  4
 #define SIZE_TEST			(SIZE_VALUE * INTERVAL_TEST)
 
 /**************************************************************/

@@ -19,6 +19,8 @@ void FBAR_Reset(uint16_t * bufferFrom, uint8_t * bufferTo);
 
 void FBAR_Compress(uint16_t * bufferCompress, uint8_t * bufferSample);
 
+// static uint8_t FBAR_AdaptCutValues(uint8_t channel, int16_t Value);
+
 void FBAR_Dissemble(uint16_t * bufferFrom, uint8_t * bufferTo, DataStateTypeDef DataState);
 
 #endif

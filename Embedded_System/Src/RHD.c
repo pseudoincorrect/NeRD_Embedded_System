@@ -288,7 +288,7 @@ void RHD_SampleTest(uint16_t * buffer, uint8_t test)
 		case 1 :
 		{
 			for (chan = 0; chan < CHANNEL_SIZE; chan++)
-				*bufferSampleTest++ = testBuffer[testElement] * (chan+1) + 10000;
+				*bufferSampleTest++ = (testBuffer[testElement] * (chan) + 10000) / 2;
 			
 			testElement++;
 			
