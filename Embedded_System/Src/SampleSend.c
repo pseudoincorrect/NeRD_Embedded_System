@@ -1,3 +1,14 @@
+// *************************************************************************
+/* ************************************************************************
+  * @file    SampleSend.c
+  * @author  Maxime CLEMENT
+  * @version V1.0
+  * @date    06-Oct-2015
+  * @brief   RHD2000 module driver driver.
+  *          This file provides functions to manage the SPI module  RHD2000:        
+  @verbatim
+*/
+
 #include "SampleSend.h"
 
 static DataStateTypeDef DataState = FIRST_STATE;

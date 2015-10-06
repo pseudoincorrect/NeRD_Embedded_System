@@ -1,6 +1,15 @@
-#include "board_interface.h"
+// *************************************************************************
+/* ************************************************************************
+  * @file    board_interface.c
+  * @author  Maxime CLEMENT
+  * @version V1.0
+  * @date    06-Oct-2015
+  * @brief   Acquisition driver.
+  *          This file provides functions to manage the acquisition of the neuronal signal via the RHD2000:        
+  @verbatim
+*/
 
-//static Board_StateTypeDef BoardState = IDDLE;
+#include "board_interface.h"
 
 /**************************************************************/
 //					SystemClock_Config

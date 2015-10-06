@@ -149,8 +149,8 @@ void DataBuffer_Process(void)
         ResetCnt++;
         if(ResetCnt > 500)
         {  
-          //FBAR_Compress(DataBufferRead16(), DataBufferWrite8());
-          DataBuffer_ApplyReset();
+          FBAR_Compress(DataBufferRead16(), DataBufferWrite8());
+          //DataBuffer_ApplyReset();
           ResetCnt = 0;
         }
         else

@@ -2,7 +2,7 @@
 #ifndef __COMMONDEFINE_H__
 #define __COMMONDEFINE_H__
 
-#define TESTBUFFER
+//#define TESTBUFFER
 
 //#define SWITCH_CHANNEL
 

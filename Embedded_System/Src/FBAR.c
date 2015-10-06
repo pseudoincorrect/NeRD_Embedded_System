@@ -1,6 +1,35 @@
+// *************************************************************************
+/* ************************************************************************
+  * @file    FBAR.c
+  * @author  Maxime CLEMENT
+  * @version V1.0
+  * @date    06-Oct-2015
+  * @brief   RHD2000 module driver driver.
+  *          This file provides functions to manage the SPI module  RHD2000:        
+  @verbatim
+*/
+
+/*************************************************************************
+              ##### How to use this driver #####
+              
+Example : N = 2 ==> 2 bits ==> 3 cuts values ==> 4 winners
+						  CUT_VAL_SIZE = 3   ==> (2^2 - 1)
+
+cut val i :							0					1					2 	
+							|---------|---------|---------|---------|
+winner :					00				01				10				11
+Delta	 :			|---------|
+
+EtaAdd  [0] = Eta/1			[1] =	Eta/2			[2] =	Eta/3		
+EtaSous [0] = Eta/3			[1] =	Eta/2			[2] =	Eta/1	             
+*************************************************************************/
+
 #include "FBAR.h"
 
-
+#define H_     120/128
+#define BETA   8
+#define ETA_   512
+#define DELTA_ 400
 
 // *************************************************************************
 // *************************************************************************
@@ -14,29 +43,16 @@ static uint8_t FBAR_AdaptCutValues(uint8_t channel, int16_t Value);
 // 						static variables	
 // *************************************************************************
 // *************************************************************************
-static uint16_t EtaAdd[CUT_VAL_SIZE]    = {0};
-static uint16_t EtaSous[CUT_VAL_SIZE]   = {0};
-static uint16_t PrevPrediction[CHANNEL_SIZE] = {0};
+static int16_t EtaAdd[CUT_VAL_SIZE]    = {0};
+static int16_t EtaSous[CUT_VAL_SIZE]   = {0};
+static int16_t PrevPrediction[CHANNEL_SIZE] = {0};
 
-static int16_t cutValue[CHANNEL_SIZE][CUT_VAL_SIZE + 1]     = {0}; // (CUT_VAL_SIZE + 1) : we add 1 to avoid the warning out of range line 115
-static int16_t cutValueSave[CHANNEL_SIZE][CUT_VAL_SIZE + 1] = {0}; // (CUT_VAL_SIZE + 1) : we add 1 to avoid the warning out of range line 11
-static uint16_t Delta           = 0; // initial resolution compression = range / number of cut value
-static uint16_t PredictorError  = 0;
-static uint16_t Eta             = 0;
-static uint16_t Beta            = 1;
-
-
-/*	Example : N = 2 ==> 2 bits ==> 3 cuts values ==> 4 winners
-						  CUT_VAL_SIZE = 3   ==> (2^2 - 1)
-
-cut val i :							0					1					2 	
-							|---------|---------|---------|---------|
-winner :					00				01				10				11
-Delta	 :			|---------|
-
-EtaAdd  [0] = Eta/1			[1] =	Eta/2			[2] =	Eta/3		
-EtaSous [0] = Eta/3			[1] =	Eta/2			[2] =	Eta/1	
-*/
+static int16_t cutValue[CHANNEL_SIZE][CUT_VAL_SIZE]     = {0}; 
+static int16_t cutValueSave[CHANNEL_SIZE][CUT_VAL_SIZE] = {0}; 
+static int16_t Delta           = 0; // initial resolution compression = range / number of cut value
+static int16_t PredictorError  = 0;
+static int16_t Eta             = 0;
+static int16_t Beta            = 1;
 
 //*************************************************************************
 //*************************************************************************
@@ -48,23 +64,27 @@ EtaSous [0] = Eta/3			[1] =	Eta/2			[2] =	Eta/1
 /**************************************************************************/
 void FBAR_Init(uint8_t EtaIndex)
 {
-	int16_t i,j;
+	int16_t i;
   
 	if (EtaIndex < 100)
     EtaIndex = 100; 
   
-  Eta = 20; //(EtaIndex - 100) * 10;
+  Eta = ETA_; //(EtaIndex - 100) * 10;
 	
-	Delta = 250;
+	Delta = DELTA_;
 	
 	// initialize the first cutvalues
 	for(i=0; i < CHANNEL_SIZE; i++) 
 	{
-    for(j=0; j < CUT_VAL_SIZE; j++)  
-    {
-      cutValue[i][j] = (j-NBIT) * Delta;
-      cutValueSave[i][j] = (j-NBIT) * Delta;
-    }
+    PrevPrediction[i] = 0;
+    
+    cutValue[i][0] = - DELTA_;
+    cutValue[i][1] = 0;
+    cutValue[i][2] = DELTA_;
+    
+    cutValueSave[i][0] = - DELTA_;
+    cutValueSave[i][1] = 0;
+    cutValueSave[i][2] = DELTA_;
   }
   
   for (i=0; i < CUT_VAL_SIZE; i++)
@@ -117,49 +137,41 @@ void FBAR_Reset(uint16_t * bufferFrom, uint8_t * bufferTo)
 **************************************************************************/
 void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 {
-	static uint16_t i, winner, ValueCurrentChannel;
-  uint32_t tempError32;
+	static int16_t ValueCurrentChannel;
+	static uint16_t i, winner;
+  static uint16_t tmpValue;
   
 	#pragma unroll_completely
 	for(i=0; i < CHANNEL_SIZE; i++)
 	{		
-		ValueCurrentChannel = *bufferFrom++;   
+		tmpValue = *bufferFrom++;
     
-    //PredictorError = ValueCurrentChannel - PrevPrediction[i];
-    tempError32 = 0x8000 + ValueCurrentChannel - PrevPrediction[i];
+    tmpValue = (tmpValue >> 1) &  0x7FFF;
     
-    if (tempError32 > 0xFFFF)
-      tempError32 = 0xFFFF;
+    ValueCurrentChannel = (int16_t)tmpValue;
     
-    PredictorError =  tempError32 & 0x0000FFFF;
+    PredictorError = ValueCurrentChannel - PrevPrediction[i];
     
-    winner = FBAR_AdaptCutValues(i, (int16_t) (PredictorError - 0x8000));
- 
+    winner = FBAR_AdaptCutValues(i, PredictorError);
+    
     *bufferTo++ = winner; 
     
     if(winner == CUT_VAL_SIZE)
     {
-      if (cutValue[i][CUT_VAL_SIZE-1] > 0)
+      if (PrevPrediction[i] + cutValue[i][CUT_VAL_SIZE-1] < 32767)
         PrevPrediction[i] = ( PrevPrediction[i] + cutValue[i][CUT_VAL_SIZE-1]); 
-      else
-        PrevPrediction[i] = ( PrevPrediction[i] - ((uint16_t)(- cutValue[i][CUT_VAL_SIZE-1]))); 
     }
     else if (!winner)
     {
-      if (cutValue[i][CUT_VAL_SIZE-1] > 0)
+      if (PrevPrediction[i] + cutValue[i][CUT_VAL_SIZE-1] > - 32767)
         PrevPrediction[i] = ( PrevPrediction[i] + cutValue[i][0]);
-      else
-        PrevPrediction[i] = ( PrevPrediction[i] - ((uint16_t)(- cutValue[i][0])));
     }
     else
     {
-      if ((cutValue[i][winner-1] + cutValue[i][winner]) > 0)
-        PrevPrediction[i] = ( PrevPrediction[i] + (cutValue[i][winner-1] + cutValue[i][winner]) /2);
-      else
-        PrevPrediction[i] = ( PrevPrediction[i] - (((uint16_t) (-(cutValue[i][winner-1] + cutValue[i][winner]) /2 ))));
+      PrevPrediction[i] = ( PrevPrediction[i] + (cutValue[i][winner-1] + cutValue[i][winner]) /2);
     }  
     
-    PrevPrediction[i] = PrevPrediction[i] * 120 / 128;    
+    PrevPrediction[i] = PrevPrediction[i] * H_;
 	}
 }
 
@@ -168,8 +180,8 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 /**************************************************************************/
 static uint8_t FBAR_AdaptCutValues(uint8_t channel, int16_t Value)
 {
-  static uint8_t i, winner;
-  
+  static uint8_t i, winner;  
+  static int16_t TmpCut; 
   winner = 0;
   
   #pragma unroll_completely 
@@ -177,33 +189,37 @@ static uint8_t FBAR_AdaptCutValues(uint8_t channel, int16_t Value)
   {
     if (Value >= cutValue[channel][i])
     {
+      TmpCut = EtaAdd[i]-(cutValue[channel][i]) / BETA;
       if(i == (CUT_VAL_SIZE-1))
-      {
+      {        
         // on controle que les cutvalues ne dépassent pas l2^15 - 1 
-        if (cutValue[channel][CUT_VAL_SIZE-1] < 32767 - Eta) 
-          cutValue[channel][CUT_VAL_SIZE-1] += Eta;
+        if (cutValue[channel][CUT_VAL_SIZE-1] < 32767 - TmpCut) 
+          cutValue[channel][CUT_VAL_SIZE-1] += TmpCut;
       }
       // anti chevauchement (et compilation warning i+1, depassement range tableau, secu à prévoir)
       else 
       {  
-        if ((cutValue[channel][i+1] - cutValue[channel][i]) >= EtaAdd[i]) 
-          cutValue[channel][i] += EtaAdd[i];	
+        if ((cutValue[channel][i+1] - cutValue[channel][i]) >= TmpCut) 
+          cutValue[channel][i] += TmpCut;	
       }
       winner = i+1; 
     }
     else	
     {
+      TmpCut = -EtaSous[i]-(cutValue[channel][i]) / BETA;
       if (!i)
       {
         // on controle que les cutvalues ne dépassent pas 0 en négatif
-        if (cutValue[channel][0] > (-32767) + Eta)  
-          cutValue[channel][0] -= Eta;        
+        if (cutValue[channel][0] > (-32767) + TmpCut)  
+          cutValue[channel][0] += TmpCut;        
       }
       // anti chevauchement (et compilation warning i-1, depassement negatif range tableau, secu à prévoir)
-      else if (((cutValue[channel][i] - cutValue[channel][i-1]) >= EtaSous[i]))  
-        cutValue[channel][i] -=  EtaSous[i];	
-    }      
-    cutValue[channel][i] -= (cutValue[channel][i] - cutValueSave[channel][i]) / 256;
+      else 
+      {
+        if (((cutValue[channel][i] - cutValue[channel][i-1]) >= TmpCut))  
+          cutValue[channel][i] +=  TmpCut;	
+      }
+    }
   }	
   return winner;  
 }
