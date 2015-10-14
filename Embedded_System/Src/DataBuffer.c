@@ -22,7 +22,7 @@ void DataBuffer_Init(DataStateTypeDef State, uint8_t EtaIndex)
 	ElectrophyData.Write8_element	= 0;
 	ElectrophyData.Read8_index 		= 0;
 
-  FBAR_Init(EtaIndex);
+  FBAR_Initialize(EtaIndex);
 }
 
 /**************************************************************/
@@ -119,10 +119,12 @@ static uint8_t *  DataBufferWrite8(void)
 //					 DataBuffer_ApplyReset
 /**************************************************************/
 void  DataBuffer_ApplyReset(void)
-{	
-	ElectrophyData.Write8_element += BYTES_PER_FRAME;
+{	  
+	ElectrophyData.Write8_element += BYTES_PER_FRAME * 3;
 	
-	FBAR_Reset(DataBufferRead16(), &ElectrophyData.Data8[ElectrophyData.Write8_index][0]);	; 
+  FBAR_Reinitialize(&ElectrophyData.Data8[ElectrophyData.Write8_index][0],     
+                    &ElectrophyData.Data8[ElectrophyData.Write8_index][BYTES_PER_FRAME], 
+                    &ElectrophyData.Data8[ElectrophyData.Write8_index][BYTES_PER_FRAME * 2]); 
 }
 
 static uint16_t ResetCnt;
@@ -147,10 +149,9 @@ void DataBuffer_Process(void)
       else
       {  
         ResetCnt++;
-        if(ResetCnt > 500)
+        if(ResetCnt > 50)
         {  
-          FBAR_Compress(DataBufferRead16(), DataBufferWrite8());
-          //DataBuffer_ApplyReset();
+          DataBuffer_ApplyReset();
           ResetCnt = 0;
         }
         else

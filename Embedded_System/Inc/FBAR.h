@@ -13,9 +13,9 @@
 #include <math.h>
 #include <CommonDefine.h>
 
-void FBAR_Init(uint8_t EtaIndex);
+void FBAR_Initialize(uint8_t EtaIndex);
 
-void FBAR_Reset(uint16_t * bufferFrom, uint8_t * bufferTo);
+void FBAR_Reinitialize(uint8_t * bufferTo1, uint8_t * bufferTo2, uint8_t * bufferTo3);
 
 void FBAR_Compress(uint16_t * bufferCompress, uint8_t * bufferSample);
 
