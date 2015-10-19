@@ -22,15 +22,15 @@ static uint8_t ClearIrqFlag[2]    = {W_REGISTER | STATUS    , 0x70}; // clear IR
 //static uint8_t ReceiveMode[2] 	= {W_REGISTER | CONFIG		, 0x3B};   // set Receive mode  0b 0011 1011 
 //static uint8_t TransmitMode[2] = {W_REGISTER | CONFIG    , 0x5A};  // set Transmit mode  0b 0101 1010
 //config with CRC 2 bytes
-static uint8_t ReceiveMode[2] 	= {W_REGISTER | CONFIG		, 0x3F};   // set Receive mode    0b 0011 1111 
-static uint8_t TransmitMode[2] = {W_REGISTER | CONFIG    , 0x5E};  // set Transmit mode    0b 0101 1110
+static uint8_t ReceiveMode[2]  = {W_REGISTER | CONFIG		, 0x3F};   // set Receive mode    0b 0011 1111 
+static uint8_t TransmitMode[2] = {W_REGISTER | CONFIG   , 0x5E};  // set Transmit mode    0b 0101 1110
 
-static uint8_t FlushRxFifo 				= FLUSH_RX;                       // flush Rx fifo
-static uint8_t FlushTxFifo				= FLUSH_TX;                      // flush Tx fifo
+static uint8_t FlushRxFifo 				= FLUSH_RX;        // flush Rx fifo
+static uint8_t FlushTxFifo				= FLUSH_TX;       // flush Tx fifo
 
-DataStateTypeDef DataStateNRF = FIRST_STATE;
-static uint8_t EtaIndex;
+DataStateTypeDef DataStateNRF = STATE_INIT;
 static uint8_t DataStateFLAG = 0;
+static uint16_t Eta = ETA_INIT, Beta = BETA_INIT;
 
 // *************************************************************************
 // *************************************************************************
@@ -310,8 +310,7 @@ void NRF_SendBuffer(uint8_t * bufferPointer)
 					CeDigitalWrite(HIGH);	// ce ==> HIGH, max 10 ms
 				} 				
  			}	
-				DataBuffer_Process();
-      
+				DataBuffer_Process();        
 		}
 		Spi1Send8Bit( ClearIrqFlag, sizeof(ClearIrqFlag) );
 		fifo_fill--;
@@ -350,9 +349,6 @@ static void RegisterInit(void)
 	CeDigitalWrite(HIGH);
 }
 
-/************************************************************************************************************************************/
-
-
 // **************************************************************
 //					Spi1ReturnSend 
 // **************************************************************
@@ -389,7 +385,6 @@ void Check_Reception(void)
   {    
     ReadPayload[0] = (R_RX_PAYLOAD);
     Spi1ReturnSend(ReadPayload, Payload,  sizeof(ReadPayload));
-    __nop();
 
     if (Payload[11] == (Payload[10] + 1)) //&& (Payload[13] == Payload[12] + 1))
     {
@@ -399,10 +394,15 @@ void Check_Reception(void)
         if ((DataRecep > 1) && (DataRecep < 5)) 
         DataStateNRF = (DataStateTypeDef) (DataRecep);
         
-        else if ((DataRecep >= 100) && (DataRecep <= 200))  
+        else if ((DataRecep >= 100) && (DataRecep <= 250))  
         {
-        DataStateNRF = __8ch_3bit__20kHz__C__;
-        EtaIndex = DataRecep;
+        DataStateNRF = __8ch_2bit__20kHz__C__;
+          
+        if(DataRecep >= 100 &&  DataRecep < 200)
+          Eta = (DataRecep - 100) * 32;
+
+        else if (DataRecep >= 200)
+          Beta = 1 << (DataRecep - 200);  
         }
     }
   }   
@@ -436,9 +436,17 @@ DataStateTypeDef NRF_GetDataState(void)
 // **************************************************************
 // 					NRF_GetEta
 // **************************************************************
-uint8_t NRF_GetEtaIndex(void)
+uint16_t NRF_GetEta(void)
 {
-    return EtaIndex;
+    return Eta;
+}
+
+// **************************************************************
+// 					NRF_GetBeta
+// **************************************************************
+uint16_t NRF_GetBeta(void)
+{
+    return Beta;
 }
 
 // **************************************************************

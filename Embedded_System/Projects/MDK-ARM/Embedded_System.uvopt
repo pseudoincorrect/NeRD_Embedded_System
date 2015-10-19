@@ -151,17 +151,17 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Fbar_Eta,0x0A</ItemText>
+          <ItemText>DataStateNRF</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>DataStateNRF</ItemText>
+          <ItemText>Eta,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Fbar_Eta,0x0A</ItemText>
+          <ItemText>Beta,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>

@@ -27,8 +27,8 @@ EtaSous [0] = Eta/3			[1] =	Eta/2			[2] =	Eta/1
 #include "FBAR.h"
 
 #define H_     120/128
-#define BETA   8
-#define ETA_   512
+#define BETA   BETA_INIT
+#define ETA_   ETA_INIT
 #define DELTA_ 400
 
 // *************************************************************************
@@ -48,7 +48,7 @@ static int16_t EtaSous[CUT_VAL_SIZE]                = {0};
 static int16_t PrevPrediction[CHANNEL_SIZE]         = {0};
 static int16_t cutValue[CHANNEL_SIZE][CUT_VAL_SIZE] = {0}; 
 static int16_t PredictorError  = 0;
-static int16_t Eta             = 0;
+static int16_t Eta, Beta       = 0;
 
 //*************************************************************************
 //*************************************************************************
@@ -58,15 +58,14 @@ static int16_t Eta             = 0;
 /**************************************************************************/
 //					FBAR_Initialize
 /**************************************************************************/
-void FBAR_Initialize(uint8_t EtaIndex)
+void FBAR_Initialize(uint16_t EtaParam, uint16_t BetaParam)
 {
 	int16_t i;
+
+  Eta  = EtaParam;
+  if (BetaParam > 0 && BetaParam <= 128)
+    Beta  = BetaParam;
   
-	if (EtaIndex < 100)
-    EtaIndex = 100; 
-  
-  Eta = ETA_; //(EtaIndex - 100) * 10;
-	
 		// initialize the first cutvalues
 	for(i=0; i < CHANNEL_SIZE; i++) 
 	{
@@ -194,7 +193,20 @@ static uint8_t FBAR_AdaptCutValues(uint8_t channel, int16_t Value)
   {
     if (Value >= cutValue[channel][i])
     {
-      TmpCut = EtaAdd[i]-(cutValue[channel][i]) / BETA;
+      //TmpCut = EtaAdd[i]-(cutValue[channel][i]) / Beta;
+      switch (Beta)
+      {
+        case (1)  : TmpCut = EtaAdd[i]-(cutValue[channel][i]) / 1  ; break;
+        case (2)  : TmpCut = EtaAdd[i]-(cutValue[channel][i]) / 2  ; break;
+        case (4)  : TmpCut = EtaAdd[i]-(cutValue[channel][i]) / 4  ; break;
+        case (8)  : TmpCut = EtaAdd[i]-(cutValue[channel][i]) / 8  ; break;
+        case (16) : TmpCut = EtaAdd[i]-(cutValue[channel][i]) / 16 ; break;
+        case (32) : TmpCut = EtaAdd[i]-(cutValue[channel][i]) / 32 ; break;                    
+        case (64) : TmpCut = EtaAdd[i]-(cutValue[channel][i]) / 64 ; break; 
+        case (128): TmpCut = EtaAdd[i]-(cutValue[channel][i]) / 128; break; 
+        default   : TmpCut = EtaAdd[i]-(cutValue[channel][i]) / 128; break;
+      }      
+      
       if(i == (CUT_VAL_SIZE-1))
       {        
         // on controle que les cutvalues ne dépassent pas l2^15 - 1 
@@ -211,7 +223,20 @@ static uint8_t FBAR_AdaptCutValues(uint8_t channel, int16_t Value)
     }
     else	
     {
-      TmpCut = -EtaSous[i]-(cutValue[channel][i]) / BETA;
+      //TmpCut = -EtaSous[i]-(cutValue[channel][i]) / Beta;
+      switch (Beta)
+      {
+        case (1)  : TmpCut = -EtaSous[i]-(cutValue[channel][i]) / 1  ; break;
+        case (2)  : TmpCut = -EtaSous[i]-(cutValue[channel][i]) / 2  ; break;
+        case (4)  : TmpCut = -EtaSous[i]-(cutValue[channel][i]) / 4  ; break;
+        case (8)  : TmpCut = -EtaSous[i]-(cutValue[channel][i]) / 8  ; break;
+        case (16) : TmpCut = -EtaSous[i]-(cutValue[channel][i]) / 16 ; break;
+        case (32) : TmpCut = -EtaSous[i]-(cutValue[channel][i]) / 32 ; break;                    
+        case (64) : TmpCut = -EtaSous[i]-(cutValue[channel][i]) / 64 ; break; 
+        case (128): TmpCut = -EtaSous[i]-(cutValue[channel][i]) / 128; break; 
+        default :   TmpCut = -EtaSous[i]-(cutValue[channel][i]) / 128; break;
+      } 
+       
       if (!i)
       {
         // on controle que les cutvalues ne dépassent pas 0 en négatif

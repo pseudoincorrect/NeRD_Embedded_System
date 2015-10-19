@@ -27,15 +27,14 @@ static void ChangeDataState(void);
 // 						Static variables	
 // *************************************************************************
 // *************************************************************************
-static DataStateTypeDef DataState = FIRST_STATE;
-static uint8_t EtaIndex;
+static DataStateTypeDef DataState = STATE_INIT;
+static uint16_t Eta = ETA_INIT, Beta = BETA_INIT;
 
 // *************************************************************************
 // *************************************************************************
 // 						Extern variables	
 // *************************************************************************
 // *************************************************************************
-extern volatile uint16_t Fbar_Eta;
 extern DataStateTypeDef DataStateNRF;
 
 int main(void)
@@ -70,24 +69,20 @@ static void ChangeDataState(void)
 {
   SampleSend_Enable(LOW);
   
-  if (DataState != NRF_GetDataState())
+  DataState = NRF_GetDataState();
+  
+  if (DataState == __8ch_2bit__20kHz__C__ )
   {
-    DataState = NRF_GetDataState();
-    EtaIndex = NRF_GetEtaIndex();
-    SampleSend_SetState(DataState);
-    DataBuffer_ChangeState(DataState, (uint8_t) EtaIndex);
-    SampleSend_SetState(DataState);
+    Eta = NRF_GetEta();
+    Beta = NRF_GetBeta();
   }
   
-  if ((DataState == __8ch_3bit__20kHz__C__ ) && (EtaIndex != NRF_GetEtaIndex()))
-  {
-    EtaIndex = NRF_GetEtaIndex();
-    DataBuffer_ChangeState(__8ch_3bit__20kHz__C__, (uint8_t) EtaIndex);
-    SampleSend_SetState(__8ch_3bit__20kHz__C__);
-  }   
+  DataBuffer_ChangeState(DataState, Eta, Beta);
+  
+  SampleSend_SetState(DataState);
+
   SampleSend_Enable(HIGH);
 }
-
 
 
 

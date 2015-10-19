@@ -2,7 +2,7 @@
 
 DataBuffer ElectrophyData;
 
-static DataStateTypeDef DataState = FIRST_STATE;
+static DataStateTypeDef DataState = STATE_INIT;
 
 volatile uint8_t * NRFptr;
 volatile uint16_t * RHDptr;
@@ -10,7 +10,7 @@ volatile uint16_t * RHDptr;
 /**************************************************************/
 //					DataBuffer_Init
 /**************************************************************/
-void DataBuffer_Init(DataStateTypeDef State, uint8_t EtaIndex)
+void DataBuffer_Init(DataStateTypeDef State, uint16_t Eta, uint16_t Beta)
 {
 	NRFptr = ElectrophyData.Data8[0];
 	RHDptr = ElectrophyData.Data16[0];
@@ -22,7 +22,7 @@ void DataBuffer_Init(DataStateTypeDef State, uint8_t EtaIndex)
 	ElectrophyData.Write8_element	= 0;
 	ElectrophyData.Read8_index 		= 0;
 
-  FBAR_Initialize(EtaIndex);
+  FBAR_Initialize(Eta, Beta);
 }
 
 /**************************************************************/
@@ -140,7 +140,7 @@ void DataBuffer_Process(void)
     
     DEBUG_HIGH;
     
-    if(DataState == __8ch_3bit__20kHz__C__)  // if Compression
+    if(DataState == __8ch_2bit__20kHz__C__)  // if Compression
     {
       if(ElectrophyData.Write8_element)
       {
@@ -184,11 +184,10 @@ void DataBuffer_Process(void)
 /**************************************************************/
 //					DataBuffer_ChangeState
 /**************************************************************/
-void DataBuffer_ChangeState(DataStateTypeDef State, uint8_t Eta)
+void DataBuffer_ChangeState(DataStateTypeDef State, uint16_t Eta, uint16_t Beta)
 {
   DataState = State; 
-  DataBuffer_Init(State, Eta);
-  //ResetCnt = 5;
+  DataBuffer_Init(State, Eta, Beta);
 }
 
 
