@@ -278,8 +278,8 @@ void NRF_SendBuffer(uint8_t * bufferPointer)
 {	
 	packetSent = 0;
 	fifo_fill  = 0;
-	SecuBreak = 0;
-  
+	SecuBreak = 0; 
+
   Check_Reception(); 
 	CeDigitalWrite(LOW);
 	

@@ -109,10 +109,20 @@ void SampleSend_SetState(DataStateTypeDef State)
 {
   DataState = State;
 
+  //(260,10); // (268,8) =  20 kHz sample
+  
   if(DataState == __8ch_16bit_10kHz_NC__)
      TIM2Init (250,20); 
-   else
-     TIM2Init (250,30); //(260,10); // (268,8) =  20 kHz sample
+  else if (DataState == __8ch_2bit__20kHz__C__)
+  { 
+    #ifdef PARAMETER_SELECTION
+    TIM2Init (250,40); 
+    #else
+    TIM2Init (250,13); 
+    #endif
+  }
+  else
+     TIM2Init (250,10); 
 }
 
 

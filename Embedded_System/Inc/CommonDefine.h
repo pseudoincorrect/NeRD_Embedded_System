@@ -2,9 +2,8 @@
 #ifndef __COMMONDEFINE_H__
 #define __COMMONDEFINE_H__
 
-#define TESTBUFFER
-
-//#define SWITCH_CHANNEL
+//#define TESTBUFFER
+//#define PARAMETER_SELECTION
 
 #define LOW		0
 #define HIGH	1
@@ -45,5 +44,11 @@ typedef enum
 } DataStateTypeDef;
 
 #define STATE_INIT	__8ch_2bit__20kHz__C__
+
+//#define SWITCH_CHANNEL
+
+#define BETA_FIXED            8
+#define ETA_FIXED             512
+
 
 #endif

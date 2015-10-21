@@ -143,7 +143,7 @@ void DataBuffer_Process(void)
     if(DataState == __8ch_2bit__20kHz__C__)  // if Compression
     {
       if(ElectrophyData.Write8_element)
-      {
+      {   
         FBAR_Compress(DataBufferRead16(),  DataBufferWrite8() );		
       }
       else
