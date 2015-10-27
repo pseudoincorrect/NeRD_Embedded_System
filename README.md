@@ -10,24 +10,24 @@ The purpose of this system is to log the the electrical activity of a rat's neur
 [global_system]: https://raw.githubusercontent.com/pseudoincorrect/Electrophy_Embedded_System/master/pictures/global_system.png "Global data acquisition system"
 
 
-### THis repository contain the code and the eagle file necessary to create a the transmitting system embedded on the rodent (see above)
+### This repository contain the code and the eagle file necessary to create a the transmitting system embedded on the rodent (see above)
 
 
 ### Features (Embedded Part)
 
-*. Omnetics adapter
-*. Transmit 4 channels of 16 bits at 20 kHz 
-*. Or 8 channels compressed (16 bits after decompression) at 20 kHz
-*. Consume 18 mA at 3.7 V at full transmission load
-*. Weight 7 grams 
-*. Volume : 2cm *2cm * 2cm 
+* Omnetics adapter
+* Transmit 4 channels of 16 bits at 20 kHz 
+* Or 8 channels compressed (16 bits after decompression) at 20 kHz
+* Consume 18 mA at 3.7 V at full transmission load
+* Weight 7 grams 
+* Volume : 2cm *2cm * 2cm 
 
 
 ### Features (Interface Part)
 
-*. USB audio protocol interface to display and log on PC
-*. 8 channels DAC to connect to an acquisition card
-*. USB as power supply
+* USB audio protocol interface to display and log on PC
+* 8 channels DAC to connect to an acquisition card
+* USB as power supply
 
 
 #### [This file]( https://github.com/pseudoincorrect/Electrophy_Base_System/UserManual.txt)  contain the directions to program the Embedded system through Keil Uvision or directly by programming through the ST-link-V2 by STMicroelectronics
