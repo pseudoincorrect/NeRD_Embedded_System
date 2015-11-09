@@ -138,7 +138,7 @@ void DataBuffer_Process(void)
     uint16_t * DataBufferRead16ptr;
     uint8_t  * DataBufferWrite8ptr;
     
-    DEBUG_HIGH;
+    //DEBUG_HIGH;
     
     if(DataState == __8ch_2bit__20kHz__C__)  // if Compression
     {
@@ -177,7 +177,7 @@ void DataBuffer_Process(void)
          FBAR_Dissemble(DataBufferRead16ptr, DataBufferWrite8ptr, DataState);      
        }
     }
-    DEBUG_LOW;
+    //DEBUG_LOW;
 	}
 }
 

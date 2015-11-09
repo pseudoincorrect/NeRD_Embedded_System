@@ -2,7 +2,7 @@
 #ifndef __COMMONDEFINE_H__
 #define __COMMONDEFINE_H__
 
-//#define TESTBUFFER
+#define TESTBUFFER
 //#define PARAMETER_SELECTION
 
 #define LOW		0
@@ -43,7 +43,7 @@ typedef enum
   
 } DataStateTypeDef;
 
-#define STATE_INIT	__8ch_2bit__20kHz__C__
+#define STATE_INIT	__8ch_16bit_10kHz_NC__
 
 //#define SWITCH_CHANNEL
 
