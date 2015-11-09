@@ -13,11 +13,13 @@
 #include <math.h>
 #include <CommonDefine.h>
 
-void FBAR_Init(uint8_t EtaIndex);
+void FBAR_Initialize(uint16_t EtaParam, uint16_t BetaParam);
 
-void FBAR_Reset(uint16_t * bufferFrom, uint8_t * bufferTo);
+void FBAR_Reinitialize(uint8_t * bufferTo1, uint8_t * bufferTo2, uint8_t * bufferTo3);
 
 void FBAR_Compress(uint16_t * bufferCompress, uint8_t * bufferSample);
+
+// static uint8_t FBAR_AdaptCutValues(uint8_t channel, int16_t Value);
 
 void FBAR_Dissemble(uint16_t * bufferFrom, uint8_t * bufferTo, DataStateTypeDef DataState);
 

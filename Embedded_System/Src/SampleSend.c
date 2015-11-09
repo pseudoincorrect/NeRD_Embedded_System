@@ -1,6 +1,17 @@
+// *************************************************************************
+/* ************************************************************************
+  * @file    SampleSend.c
+  * @author  Maxime CLEMENT
+  * @version V1.0
+  * @date    06-Oct-2015
+  * @brief   RHD2000 module driver driver.
+  *          This file provides functions to manage the SPI module  RHD2000:        
+  @verbatim
+*/
+
 #include "SampleSend.h"
 
-static DataStateTypeDef DataState = FIRST_STATE;
+static DataStateTypeDef DataState = STATE_INIT;
 
 volatile uint32_t Tim1DIER;
 volatile uint32_t Tim1SR;
@@ -14,8 +25,8 @@ void SampleSend_Init(void)
 { 
 	NRF_Init();
 	RHD_Init();
-	DataBuffer_Init(FIRST_STATE, (uint8_t) ETA_INDEX_INIT);
-	SampleSend_SetState(FIRST_STATE);
+	DataBuffer_Init(STATE_INIT, ETA_INIT, BETA_INIT);
+	SampleSend_SetState(STATE_INIT);
 }
 
 /**************************************************************/
@@ -55,11 +66,13 @@ void TIM2_IRQHandler(void)
 			__HAL_TIM_CLEAR_IT(&TimHandle, TIM_IT_UPDATE); // Remove TIMx update interrupt flag 
 			__HAL_TIM_CLEAR_FLAG(&TimHandle, TIM_IT_UPDATE);
 		}	
+		DEBUG_HIGH;		
 #ifdef TESTBUFFER
 		RHD_SampleTest(DataBuffer_Write16(), 1);
 #else
 		RHD_Sample(DataBuffer_Write16());
 #endif
+		DEBUG_LOW;
 	}
 }	
 
@@ -98,10 +111,23 @@ void SampleSend_SetState(DataStateTypeDef State)
 {
   DataState = State;
 
+  //(268,8)  = 20 kHz sample
+	//(245,12) = 15 kHz sample
+	//(262,13) = 13 kHz sample
+	//(250,18) = 10 kHz sample
+  
   if(DataState == __8ch_16bit_10kHz_NC__)
-     TIM2Init (250,20); 
-   else
-     TIM2Init (250,11); //(260,9); // (268,8) =  20 kHz sample
+     TIM2Init (250,18); 
+  else if (DataState == __8ch_2bit__20kHz__C__)
+  { 
+    #ifdef PARAMETER_SELECTION
+    TIM2Init (250,40); 
+    #else
+    TIM2Init (262,13); 
+    #endif
+  }
+  else
+     TIM2Init (245,12); 
 }
 
 

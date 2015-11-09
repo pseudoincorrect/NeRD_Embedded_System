@@ -1,5 +1,28 @@
+// *************************************************************************
+/* ************************************************************************
+  * @file    RHD.c
+  * @author  Maxime CLEMENT
+  * @version V1.0
+  * @date    06-Oct-2015
+  * @brief   RHD2000 module driver driver.
+  *          This file provides functions to manage the SPI module  RHD2000:        
+  @verbatim
+*/
+
+
+/*************************************************************************
+              ##### How to use this driver #####
+              
+              
+*************************************************************************/
+
 #include "RHD.h"
 
+// *************************************************************************
+// *************************************************************************
+// 						Public variables	
+// *************************************************************************
+// *************************************************************************
 uint8_t decal = 0;
 
 //uint16_t testValue[SIZE_VALUE] = { 4300,  8600, 11000,  8400, 12000, 
@@ -7,7 +30,6 @@ uint8_t decal = 0;
 //																	24000, 18000, 15000, 11000, 16000, 
 //																	10000,  9000,  8000,  9000,  8000,
 //																	50000,  8000, 50000,  8000,  8000};
-
 
 //uint16_t testValue[SIZE_VALUE] = {0000, 4500, 0000, 4500, 0000, 
 //																	4500, 0000, 4500, 0000, 4500,
@@ -17,9 +39,9 @@ uint8_t decal = 0;
 
 uint16_t testValue[SIZE_VALUE] = {1000, 2000, 3000, 4000, 4500, 
 																	4000, 3000, 2000, 1000, 0000,
-																	1000, 2000, 3000, 4000, 4500,
-																	4000, 3000, 2000, 1000, 0000,
-																	1000, 1000, 1000, 1000, 0000};
+																	4000, 0000, 0000, 2000, 4500,
+																	2000, 0000, 0000, 1000, 3000,
+																	1000, 3000, 1000, 3000, 0000};
 
 uint16_t testBuffer[SIZE_TEST];
 
@@ -34,7 +56,13 @@ static uint16_t channel[CHANNEL_SIZE] = {(MASK_CONVERT | CHANNEL0),
 																				 
 //static uint16_t channelTest[CHANNEL_SIZE] = {(0xE800),(0xE900),(0xEA00),(0xEB00),(0xEC00),(0xEC00),(0xEC00),(0xEC00)};  // read "INTANNN"																				
 																				 
-static void InitTestBuffer(void);																				 
+static void InitTestBuffer(void);	
+                                         
+//*************************************************************************
+//*************************************************************************
+// 										Function definitions																 
+//*************************************************************************
+//*************************************************************************	
 																				 
 // **************************************************************
 // 	 				RHD_Init 
@@ -141,6 +169,8 @@ void SPI2_IRQHandler()
 		{
 			channelIndex = 0;
 			__HAL_SPI_DISABLE_IT(&SpiHandle, SPI_IT_RXNE | SPI_IT_TXE);
+
+
 		}	
 	}
 	SPI2->SR &=  ~(SPI_IT_RXNE | SPI_IT_TXE); // clear flag to don't trigger directly an other interrupt
@@ -239,6 +269,8 @@ void RHD_Sample(uint16_t * buffer)
 {
 	bufferSample = buffer;
 	
+  //tog = 1;
+  
 	// enable interrupt : the sampling is done in the interrupt handler
 	__HAL_SPI_ENABLE_IT(&SpiHandle, SPI_IT_RXNE | SPI_IT_TXE);
 }
@@ -279,7 +311,7 @@ void RHD_SampleTest(uint16_t * buffer, uint8_t test)
 		case 1 :
 		{
 			for (chan = 0; chan < CHANNEL_SIZE; chan++)
-				*bufferSampleTest++ = testBuffer[testElement] * (chan+1);
+				*bufferSampleTest++ = (testBuffer[testElement] * (chan+2) + 10000) ;
 			
 			testElement++;
 			

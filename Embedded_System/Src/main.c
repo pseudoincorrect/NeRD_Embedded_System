@@ -1,18 +1,41 @@
+// *************************************************************************
+/* ************************************************************************
+  * @file    main.c
+  * @author  Maxime CLEMENT
+  * @version V1.0
+  * @date    06-Oct-2015
+  * @brief   RHD2000 module driver driver.
+  *          This file provides functions to manage the SPI module  RHD2000:        
+  @verbatim
+*/
+
 #include "stm32f0xx_hal.h"
 #include "NRF.h"
 #include "SampleSend.h"
 #include "board_interface.h"
 #include "CommonDefine.h"
 
+// *************************************************************************
+// *************************************************************************
+// 						Static functions	
+// *************************************************************************
+// *************************************************************************
 static void ChangeDataState(void);
 
-static DataStateTypeDef DataState = FIRST_STATE;
+// *************************************************************************
+// *************************************************************************
+// 						Static variables	
+// *************************************************************************
+// *************************************************************************
+static DataStateTypeDef DataState = STATE_INIT;
+static uint16_t Eta = ETA_INIT, Beta = BETA_INIT;
 
+// *************************************************************************
+// *************************************************************************
+// 						Extern variables	
+// *************************************************************************
+// *************************************************************************
 extern DataStateTypeDef DataStateNRF;
-  
-static uint8_t EtaIndex;
-
-extern volatile uint16_t Fbar_Eta;
 
 int main(void)
 {
@@ -46,26 +69,20 @@ static void ChangeDataState(void)
 {
   SampleSend_Enable(LOW);
   
-  if (DataState != NRF_GetDataState())
+  DataState = NRF_GetDataState();
+  
+  if (DataState == __8ch_2bit__20kHz__C__ )
   {
-    DataState = NRF_GetDataState();
-    EtaIndex = NRF_GetEtaIndex();
-    SampleSend_SetState(DataState);
-    DataBuffer_ChangeState(DataState, (uint8_t) EtaIndex);
-    //DataBuffer_ChangeState(DataState, (uint8_t) 0);
-    SampleSend_SetState(DataState);
+    Eta = NRF_GetEta();
+    Beta = NRF_GetBeta();
   }
   
-  if ((DataState == __8ch_3bit__20kHz__C__ ) && (EtaIndex != NRF_GetEtaIndex()))
-  {
-    EtaIndex = NRF_GetEtaIndex();
-    DataBuffer_ChangeState(__8ch_3bit__20kHz__C__, (uint8_t) EtaIndex);
-    //DataBuffer_ChangeState(__8ch_3bit__20kHz__C__, (uint8_t) 0);
-    SampleSend_SetState(__8ch_3bit__20kHz__C__);
-  }   
+  DataBuffer_ChangeState(DataState, Eta, Beta);
+  
+  SampleSend_SetState(DataState);
+
   SampleSend_Enable(HIGH);
 }
-
 
 
 

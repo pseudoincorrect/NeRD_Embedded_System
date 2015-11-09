@@ -67,11 +67,12 @@ void Check_Reception(void);
 static void RegisterInit(void);
 // function used by the main program to check wether we receive order from the base
 uint8_t NRF_CheckChange(void);
-// getter for
+// getter for State data
 DataStateTypeDef NRF_GetDataState(void);
-
-uint8_t NRF_GetEtaIndex(void);
-
+// getter for Eta
+uint16_t NRF_GetEta(void);
+// getter for Beta
+uint16_t NRF_GetBeta(void);
 // test the nrf (ask for the adress pipe 2
 void NRF_Test(void);
 

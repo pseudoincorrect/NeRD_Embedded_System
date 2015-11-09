@@ -151,26 +151,31 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Fbar_Eta,0x0A</ItemText>
+          <ItemText>DataStateNRF</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>DataStateNRF</ItemText>
+          <ItemText>Eta,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Beta,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
-          <SubType>256</SubType>
-          <ItemText>ReadPayload</ItemText>
+          <SubType>266</SubType>
+          <ItemText>&amp;(Fbar_EtaAdd[0])</ItemText>
         </Mm>
       </MemoryWindow1>
       <MemoryWindow2>
         <Mm>
           <WinNumber>2</WinNumber>
-          <SubType>256</SubType>
-          <ItemText>&amp;Payload[0]</ItemText>
+          <SubType>10</SubType>
+          <ItemText>cutValue</ItemText>
         </Mm>
       </MemoryWindow2>
       <MemoryWindow3>
@@ -499,7 +504,7 @@
 
   <Group>
     <GroupName>Application/MDK-ARM</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
