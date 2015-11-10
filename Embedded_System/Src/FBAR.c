@@ -150,12 +150,23 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
 	static int16_t ValueCurrentChannel;
 	static uint16_t i, winner;
   static uint16_t tmpValue;
-  
+  #ifdef COMPARISON
+	static uint16_t NonCompress[2];
+	#endif
+	
 	#pragma unroll_completely
+	#ifdef COMPARISON
+	for(i=0; i < 2; i++)
+	#else
 	for(i=0; i < CHANNEL_SIZE; i++)
+	#endif
 	{		
 		tmpValue = *bufferFrom++;
     
+		#ifdef COMPARISON
+		*(NonCompress + i) = tmpValue;
+		#endif
+		
     tmpValue = (tmpValue >> 1) & 0x7FFF;
     
     ValueCurrentChannel = (int16_t)tmpValue;
@@ -165,7 +176,7 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
     winner = FBAR_AdaptCutValues(i, PredictorError);
     
     *bufferTo++ = winner; 
-    
+		
     if(winner == CUT_VAL_SIZE)
     {
       if (PrevPrediction[i] + cutValue[i][CUT_VAL_SIZE-1] < 32767)
@@ -173,6 +184,7 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
     }
     else if (!winner)
     {
+			
       if (PrevPrediction[i] + cutValue[i][CUT_VAL_SIZE-1] > - 32767)
         PrevPrediction[i] = ( PrevPrediction[i] + cutValue[i][0]);
     }
@@ -182,9 +194,18 @@ void FBAR_Compress(uint16_t * bufferFrom, uint8_t * bufferTo)
     }     
     PrevPrediction[i] = PrevPrediction[i] * H_;
 	}
+		#ifdef COMPARISON
+		*bufferTo++ = (*NonCompress) 			 >> 8;
+		*bufferTo++ = (*NonCompress) 			 & 0X00FF; 	
+		*bufferTo++ = (*(NonCompress + 1)) >> 8;
+		*bufferTo++ = (*(NonCompress + 1)) & 0X00FF;
+		*bufferTo++ = 0;
+		*bufferTo++ = 0;
+		*bufferTo++ = 0;
+		*bufferTo++ = 0;
+		#endif
 }
 
-#ifdef PARAMETER_SELECTION
 /**************************************************************************/
 //					FBAR_AdaptCutValues
 /**************************************************************************/
@@ -198,9 +219,11 @@ static uint8_t FBAR_AdaptCutValues(uint8_t channel, int16_t Value)
   for (i=0; i < CUT_VAL_SIZE; i++)
   {
     if (Value >= cutValue[channel][i])
-    {   
-      //TmpCut = EtaAdd[i]-(cutValue[channel][i]) / Beta;
-      switch (Beta)
+    {  
+			#ifndef PARAMETER_SELECTION			
+      TmpCut = EtaAdd[i]-(cutValue[channel][i]) / BETA_FIXED;
+      #else
+			switch (Beta)
       {
         case (1)  : TmpCut = EtaAdd[i]-(cutValue[channel][i]) / 1  ; break;
         case (2)  : TmpCut = EtaAdd[i]-(cutValue[channel][i]) / 2  ; break;
@@ -212,7 +235,7 @@ static uint8_t FBAR_AdaptCutValues(uint8_t channel, int16_t Value)
         case (128): TmpCut = EtaAdd[i]-(cutValue[channel][i]) / 128; break; 
         default   : TmpCut = EtaAdd[i]-(cutValue[channel][i]) / 256; break;
       }      
-     
+			#endif
       if(i == (CUT_VAL_SIZE-1))
       {        
         // on controle que les cutvalues ne dépassent pas l2^15 - 1 
@@ -229,8 +252,10 @@ static uint8_t FBAR_AdaptCutValues(uint8_t channel, int16_t Value)
     }
     else	
     {
-     //TmpCut = -EtaSous[i]-(cutValue[channel][i]) / Beta;
-      switch (Beta)
+			#ifndef PARAMETER_SELECTION
+      TmpCut = -EtaSous[i]-(cutValue[channel][i]) / BETA_FIXED;
+      #else
+			switch (Beta)
       {
         case (1)  : TmpCut = -EtaSous[i]-(cutValue[channel][i]) / 1  ; break;
         case (2)  : TmpCut = -EtaSous[i]-(cutValue[channel][i]) / 2  ; break;
@@ -242,6 +267,7 @@ static uint8_t FBAR_AdaptCutValues(uint8_t channel, int16_t Value)
         case (128): TmpCut = -EtaSous[i]-(cutValue[channel][i]) / 128; break; 
         default :   TmpCut = -EtaSous[i]-(cutValue[channel][i]) / 256; break;
       } 
+			#endif 
       if (!i)
       {
         // on controle que les cutvalues ne dépassent pas 0 en négatif
@@ -258,59 +284,6 @@ static uint8_t FBAR_AdaptCutValues(uint8_t channel, int16_t Value)
   }	
   return winner;  
 }
- 
-#else
-/**************************************************************************/
-//					FBAR_AdaptCutValues
-/**************************************************************************/
-static uint8_t FBAR_AdaptCutValues(uint8_t channel, int16_t Value)
-{
-  static uint8_t i, winner;  
-  static int16_t TmpCut; 
-  winner = 0;
-  
-  #pragma unroll_completely 
-  for (i=0; i < CUT_VAL_SIZE; i++)
-  {
-    if (Value >= cutValue[channel][i])
-    {             
-      TmpCut = EtaAdd[i]-(cutValue[channel][i]) / BETA_FIXED;
-      
-      if(i == (CUT_VAL_SIZE-1))
-      {        
-        // on controle que les cutvalues ne dépassent pas l2^15 - 1 
-        if (cutValue[channel][CUT_VAL_SIZE-1] < 32767 - TmpCut) 
-          cutValue[channel][CUT_VAL_SIZE-1] += TmpCut;
-      }
-      // anti chevauchement (et compilation warning i+1, depassement range tableau, secu à prévoir)
-      else 
-      {  
-        if ((cutValue[channel][i+1] - cutValue[channel][i]) >= TmpCut) 
-          cutValue[channel][i] += TmpCut;	
-      }
-      winner = i+1; 
-    }
-    else	
-    {
-      TmpCut = -EtaSous[i]-(cutValue[channel][i]) / BETA_FIXED;
-       
-      if (!i)
-      {
-        // on controle que les cutvalues ne dépassent pas 0 en négatif
-        if (cutValue[channel][0] > (-32767) + TmpCut)  
-          cutValue[channel][0] += TmpCut;        
-      }
-      // anti chevauchement (et compilation warning i-1, depassement negatif range tableau, secu à prévoir)
-      else 
-      {
-        if (((cutValue[channel][i] - cutValue[channel][i-1]) >= TmpCut))  
-          cutValue[channel][i] +=  TmpCut;	
-      }
-    }
-  }	
-  return winner;  
-}
-#endif
 
 /**************************************************************************/
 //					FBAR_Dissemble

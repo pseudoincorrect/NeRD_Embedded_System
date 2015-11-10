@@ -66,13 +66,13 @@ void TIM2_IRQHandler(void)
 			__HAL_TIM_CLEAR_IT(&TimHandle, TIM_IT_UPDATE); // Remove TIMx update interrupt flag 
 			__HAL_TIM_CLEAR_FLAG(&TimHandle, TIM_IT_UPDATE);
 		}	
-		DEBUG_HIGH;		
+		//DEBUG_HIGH;		
 #ifdef TESTBUFFER
 		RHD_SampleTest(DataBuffer_Write16(), 1);
 #else
 		RHD_Sample(DataBuffer_Write16());
 #endif
-		DEBUG_LOW;
+		//DEBUG_LOW;
 	}
 }	
 
@@ -121,9 +121,10 @@ void SampleSend_SetState(DataStateTypeDef State)
   else if (DataState == __8ch_2bit__20kHz__C__)
   { 
     #ifdef PARAMETER_SELECTION
-    TIM2Init (250,40); 
+    TIM2Init (250,16); 
+		//TIM2Init (250,40); 
     #else
-    TIM2Init (262,13); 
+    TIM2Init (245,12); 
     #endif
   }
   else

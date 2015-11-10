@@ -2,8 +2,11 @@
 #ifndef __COMMONDEFINE_H__
 #define __COMMONDEFINE_H__
 
-#define TESTBUFFER
-//#define PARAMETER_SELECTION
+//#define TESTBUFFER
+
+#define COMPARISON // On compressing mode, compress only 4 chanel and send at the same time their non-compressed value to compare
+
+//#define PARAMETER_SELECTION //enable the change of Beta
 
 #define LOW		0
 #define HIGH	1
@@ -43,12 +46,11 @@ typedef enum
   
 } DataStateTypeDef;
 
-#define STATE_INIT	__8ch_16bit_10kHz_NC__
+#define STATE_INIT	__8ch_2bit__20kHz__C__
 
-//#define SWITCH_CHANNEL
+
 
 #define BETA_FIXED            8
 #define ETA_FIXED             512
-
 
 #endif
