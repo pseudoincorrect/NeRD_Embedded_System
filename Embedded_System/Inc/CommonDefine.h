@@ -50,7 +50,7 @@ typedef enum
 
 
 
-#define BETA_FIXED            8
-#define ETA_FIXED             512
+#define BETA_FIXED  8
+#define ETA_FIXED   512
 
 #endif
