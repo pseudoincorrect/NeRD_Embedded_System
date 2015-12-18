@@ -25,7 +25,7 @@ void SampleSend_Init(void)
 { 
 	NRF_Init();
 	RHD_Init();
-	DataBuffer_Init(STATE_INIT, ETA_INIT, BETA_INIT);
+	DataBuffer_Init(STATE_INIT, ETA_, BETA_);
 	SampleSend_SetState(STATE_INIT);
 }
 

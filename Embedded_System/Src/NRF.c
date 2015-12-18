@@ -30,7 +30,7 @@ static uint8_t FlushTxFifo				= FLUSH_TX;       // flush Tx fifo
 
 DataStateTypeDef DataStateNRF = STATE_INIT;
 static uint8_t DataStateFLAG = 0;
-static uint16_t Eta = ETA_INIT, Beta = BETA_INIT;
+static uint16_t Eta = ETA_, Beta = BETA_;
 
 // *************************************************************************
 // *************************************************************************
