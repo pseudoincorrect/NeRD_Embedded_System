@@ -34,5 +34,6 @@ The purpose of this system is to log the the electrical activity of a rat's neur
 
 On this version, we use the Microcontroler [STM32f051C8T7](http://www.st.com/web/en/catalog/mmc/SC1169/SS1574/LN7/PF251889) to interface the Intantech [RHD2132](http://www.intantech.com/products_RHD2000.html) ADC device, and the Nordic Semiconductor [Nrf24l01+](http://www.nordicsemi.com/eng/Products/2.4GHz-RF/nRF24L01) RF transciever.
 
-### Short description of the working process of the Embedded system
+
+Eagle files and manual provided in this repertory
 
